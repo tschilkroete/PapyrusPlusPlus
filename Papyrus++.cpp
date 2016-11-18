@@ -74,5 +74,10 @@ void settings() {
 }
 
 void about() {
-
+	::MessageBox(nullptr, L"Copyright 2016\r\n"
+	                       "Contributors:\r\n"
+	                       "Tschilkroete\r\n"
+	                       "\r\n"
+	                       "This plugin is licenced under the GNU General Public Licence 3 https://www.gnu.org/licenses/gpl.txt \r\n"
+	                       "Get the source code: https://github.com/tschilkroete/PapyrusPlusPlus", L"Papyrus++ " VERSION, MB_OK);
 }
