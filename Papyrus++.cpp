@@ -58,7 +58,7 @@ extern "C" __declspec(dllexport) LRESULT messageProc(UINT message, WPARAM wParam
 void init() {
 	funcs[0] = FuncItem{ L"Compile", compile, 0, false, new ShortcutKey{true, false, true, 0x43} };
 	funcs[1] = FuncItem{ L"Settings", settings, 1, false, nullptr };
-	funcs[2] = FuncItem{ L"Compile", about, 2, false, nullptr };
+	funcs[2] = FuncItem{ L"About", about, 2, false, nullptr };
 }
 
 void cleanUp() {
