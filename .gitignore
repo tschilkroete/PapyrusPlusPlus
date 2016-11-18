@@ -1,0 +1,4 @@
+npp/
+Debug/
+
+*.vcxproj*
