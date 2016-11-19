@@ -20,21 +20,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include "settings.hpp"
-#include "npp\PluginInterface.h"
-#include <windows.h>
 
-#define VERSION "0.0"
+#include <Windows.h>
 
-const WCHAR* PLUGIN_NAME = L"Papyrus++";
-const int funcCount = 3;
-FuncItem funcs[funcCount];
-NppData nppData;
-Settings settings;
-HINSTANCE instance;
+#include <string>
 
-void init();
-void cleanUp();
-
-void compile();
-void settingsWindow();
-void about();
+class SettingsWindow
+{
+public:
+	SettingsWindow(Settings& settings, HINSTANCE instance,HWND parent);
+	void save();
+private:
+	std::wstring getText(HWND edit);
+	static LRESULT CALLBACK windowProcedure(HWND window, UINT message, WPARAM wParam, LPARAM lParam);
+	Settings& settings;
+	HWND compilerPath;
+	HWND importDirectories;
+	HWND exportDirectory;
+	HWND additionalArguments;
+};

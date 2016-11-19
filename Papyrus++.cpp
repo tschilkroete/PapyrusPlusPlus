@@ -20,11 +20,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include "papyrus++.hpp"
+#include "settingsWindow.hpp"
 
 #include <string>
 
-BOOL WINAPI DllMain(HINSTANCE module, DWORD reason, LPVOID reserved) {
+BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID) {
 	if (reason == DLL_PROCESS_ATTACH) {
+		::instance = instance;
 	} else if (reason == DLL_PROCESS_DETACH) {
 		cleanUp();
 	}
@@ -71,11 +73,10 @@ void cleanUp() {
 }
 
 void compile() {
-
 }
 
 void settingsWindow() {
-
+	SettingsWindow(settings, instance, nppData._nppHandle);
 }
 
 void about() {
