@@ -21,9 +21,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Papyrus++.h"
 
+#include <string>
+
 BOOL WINAPI DllMain(HINSTANCE module, DWORD reason, LPVOID reserved) {
 	if (reason == DLL_PROCESS_ATTACH) {
-		init();
 	} else if (reason == DLL_PROCESS_DETACH) {
 		cleanUp();
 	}
@@ -40,6 +41,7 @@ extern "C" __declspec(dllexport) BOOL isUnicode() {
 
 extern "C" __declspec(dllexport) void setInfo(NppData nppData) {
 	::nppData = nppData;
+	init();
 }
 
 extern "C" __declspec(dllexport) FuncItem* getFuncsArray(int* count) {
@@ -57,19 +59,22 @@ extern "C" __declspec(dllexport) LRESULT messageProc(UINT message, WPARAM wParam
 
 void init() {
 	funcs[0] = FuncItem{ L"Compile", compile, 0, false, new ShortcutKey{true, false, true, 0x43} };
-	funcs[1] = FuncItem{ L"Settings", settings, 1, false, nullptr };
+	funcs[1] = FuncItem{ L"Settings", settingsWindow, 1, false, nullptr };
 	funcs[2] = FuncItem{ L"About", about, 2, false, nullptr };
+
+	wchar_t settingsPath[MAX_PATH * sizeof(wchar_t)];
+	::SendMessage(nppData._nppHandle, NPPM_GETPLUGINSCONFIGDIR, MAX_PATH * sizeof(wchar_t), (LPARAM)settingsPath);
+	settings.load(std::wstring(settingsPath));
 }
 
 void cleanUp() {
-
 }
 
 void compile() {
 
 }
 
-void settings() {
+void settingsWindow() {
 
 }
 

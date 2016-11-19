@@ -19,22 +19,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include "Settings.h"
+#include <string>
+#include <vector>
 
-#include "npp\PluginInterface.h"
-#include <windows.h>
-
-#define VERSION "0.0"
-
-const WCHAR* PLUGIN_NAME = L"Papyrus++";
-const int funcCount = 3;
-FuncItem funcs[funcCount];
-NppData nppData;
-Settings settings;
-
-void init();
-void cleanUp();
-
-void compile();
-void settingsWindow();
-void about();
+class Settings
+{
+public:
+	Settings();
+	void load(std::wstring configDir);
+	void save();
+	std::wstring getString(std::wstring key, std::wstring defaultValue = L"");
+	void putString(std::wstring key, std::wstring value);
+private:
+	std::wstring settingsPath;
+	std::vector<std::pair<std::wstring, std::wstring>> data;
+};
