@@ -55,7 +55,7 @@ void SettingsWindow::save() {
 
 std::wstring SettingsWindow::getText(HWND edit) {
 	int length = ::SendMessage(edit, EM_LINELENGTH, 0, 0);
-	std::vector<wchar_t> content(length);
+	std::vector<wchar_t> content(length > 1 ? length : 1);
 	content[0] = length;
 	::SendMessage(edit, EM_GETLINE, 0, (LPARAM)&content[0]);
 	return std::wstring(&content[0], length);

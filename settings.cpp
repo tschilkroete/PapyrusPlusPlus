@@ -36,7 +36,9 @@ bool Settings::load(std::wstring configDir) {
 	while (std::getline(settingsFile, line)) {
 		int equalsIndex = line.find_first_of(L'=');
 		std::wstring key = line.substr(0, equalsIndex);
-		std::wstring value = line.substr(equalsIndex + 1);
+		std::wstring value;
+		if(equalsIndex != line.length() - 1)
+			value = line.substr(equalsIndex + 1);
 		data.push_back(std::pair<std::wstring, std::wstring>(key, value));
 	}
 	settingsFile.close();
