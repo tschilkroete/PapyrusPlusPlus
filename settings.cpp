@@ -27,7 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Settings::Settings() {
 }
 
-void Settings::load(std::wstring configDir) {
+bool Settings::load(std::wstring configDir) {
 	settingsPath = configDir + L"\\papyrus++.ini";
 
 	std::wifstream settingsFile(settingsPath);
@@ -40,6 +40,10 @@ void Settings::load(std::wstring configDir) {
 		data.push_back(std::pair<std::wstring, std::wstring>(key, value));
 	}
 	settingsFile.close();
+	if (data.size())
+		return true;
+	else
+		return false;
 }
 
 void Settings::save() {

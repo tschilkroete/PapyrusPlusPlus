@@ -26,7 +26,7 @@ class Settings
 {
 public:
 	Settings();
-	void load(std::wstring configDir);
+	bool load(std::wstring configDir);
 	void save();
 	std::wstring getString(std::wstring key, std::wstring defaultValue = L"");
 	void putString(std::wstring key, std::wstring value);

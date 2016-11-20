@@ -29,13 +29,13 @@ class SettingsWindow
 {
 public:
 	SettingsWindow(Settings& settings, HINSTANCE instance,HWND parent);
-	void save();
 private:
+	void save();
 	std::wstring getText(HWND edit);
 	static LRESULT CALLBACK windowProcedure(HWND window, UINT message, WPARAM wParam, LPARAM lParam);
 	Settings& settings;
 	HWND compilerPath;
 	HWND importDirectories;
-	HWND exportDirectory;
+	HWND outputDirectory;
 	HWND additionalArguments;
 };
