@@ -70,9 +70,9 @@ void init() {
 		::MessageBox(nppData._nppHandle, L"Confirm the compiler settings.\nYou can change them later if you want in Plugins > Papyrus++ > Settings", L"Papyrus++ setup", MB_OK);
 		
 		DWORD size;
-		::RegGetValue(HKEY_LOCAL_MACHINE, L"SOFTWARE\\WOW6432Node\\bethesda softworks\\skyrim", L"installed path", RRF_RT_ANY, nullptr, nullptr, &size);
+		::RegGetValue(HKEY_LOCAL_MACHINE, L"SOFTWARE\\bethesda softworks\\skyrim", L"installed path", RRF_RT_ANY, nullptr, nullptr, &size);
 		std::vector<wchar_t> skyrimPathC(size / sizeof(wchar_t));
-		::RegGetValue(HKEY_LOCAL_MACHINE, L"SOFTWARE\\WOW6432Node\\bethesda softworks\\skyrim", L"installed path", RRF_RT_ANY, nullptr, &skyrimPathC[0], &size);
+		::RegGetValue(HKEY_LOCAL_MACHINE, L"SOFTWARE\\bethesda softworks\\skyrim", L"installed path", RRF_RT_ANY, nullptr, &skyrimPathC[0], &size);
 		std::wstring skyrimPath(&skyrimPathC[0]);
 		settings.putString(L"compilerPath", skyrimPath + L"Papyrus Compiler");
 		settings.putString(L"importDirectories", skyrimPath + L"Data\\Scripts\\Source");
