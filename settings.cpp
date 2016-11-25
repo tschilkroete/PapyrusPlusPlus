@@ -19,10 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "settings.hpp"
 
+#include <Windows.h>
+
 #include <codecvt>
 #include <fstream>
-
-#include <Windows.h>
 
 Settings::Settings() {
 }
@@ -57,7 +57,7 @@ void Settings::save() {
 	settingsFile.close();
 }
 
-std::wstring Settings::getString(std::wstring key, std::wstring defaultValue) {
+std::wstring Settings::getString(std::wstring key, std::wstring defaultValue) const {
 	for (std::pair<std::wstring, std::wstring> p : data) {
 		if (p.first == key) {
 			return p.second;

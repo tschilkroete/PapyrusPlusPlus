@@ -19,7 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include "compilationThread.hpp"
 #include "settings.hpp"
+
 #include "npp\PluginInterface.h"
 #include <windows.h>
 
@@ -31,9 +33,11 @@ FuncItem funcs[funcCount];
 NppData nppData;
 Settings settings;
 HINSTANCE instance;
+HWND messageHandle;
 
 void init();
 void cleanUp();
+LRESULT CALLBACK messageHandleProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam);
 
 void compile();
 void settingsWindow();

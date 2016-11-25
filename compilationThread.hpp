@@ -19,18 +19,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include <string>
-#include <vector>
+#include "settings.hpp"
 
-class Settings
+#include <Windows.h>
+
+#include <thread>
+
+class CompilationThread
 {
 public:
-	Settings();
-	bool load(std::wstring configDir);
-	void save();
-	std::wstring getString(std::wstring key, std::wstring defaultValue = L"") const;
-	void putString(std::wstring key, std::wstring value);
+	CompilationThread(HWND window, const Settings& settings);
+	void start(std::wstring inputFile);
 private:
-	std::wstring settingsPath;
-	std::vector<std::pair<std::wstring, std::wstring>> data;
+	static void run(CompilationThread& compilationThread, std::wstring inputFile);
+	std::thread compilationThread;
+	HWND window;
+	const Settings& settings;
 };

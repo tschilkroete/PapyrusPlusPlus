@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include "messages.hpp"
 #include "papyrus++.hpp"
 #include "settingsWindow.hpp"
 
@@ -60,12 +61,19 @@ extern "C" __declspec(dllexport) LRESULT messageProc(UINT message, WPARAM wParam
 }
 
 void init() {
+	WNDCLASS messageHandleClass = {};
+	messageHandleClass.hInstance = instance;
+	messageHandleClass.lpfnWndProc = messageHandleProc;
+	messageHandleClass.lpszClassName = L"MESSAGE_WINDOW";
+	::RegisterClass(&messageHandleClass);
+	messageHandle = ::CreateWindow(L"MESSAGE_WINDOW", L"", 0, 0, 0, 0, 0, HWND_MESSAGE, nullptr, instance, nullptr);
+
 	funcs[0] = FuncItem{ L"Compile", compile, 0, false, new ShortcutKey{true, false, true, 0x43} };
 	funcs[1] = FuncItem{ L"Settings", settingsWindow, 1, false, nullptr };
 	funcs[2] = FuncItem{ L"About", about, 2, false, nullptr };
 
-	wchar_t settingsPath[MAX_PATH * sizeof(wchar_t)];
-	::SendMessage(nppData._nppHandle, NPPM_GETPLUGINSCONFIGDIR, MAX_PATH * sizeof(wchar_t), (LPARAM)settingsPath);
+	wchar_t settingsPath[MAX_PATH];
+	::SendMessage(nppData._nppHandle, NPPM_GETPLUGINSCONFIGDIR, MAX_PATH, (LPARAM)settingsPath);
 	if (!settings.load(std::wstring(settingsPath))) {
 		::MessageBox(nppData._nppHandle, L"Confirm the compiler settings.\nYou can change them later if you want in Plugins > Papyrus++ > Settings", L"Papyrus++ setup", MB_OK);
 		
@@ -74,7 +82,7 @@ void init() {
 		std::vector<wchar_t> skyrimPathC(size / sizeof(wchar_t));
 		::RegGetValue(HKEY_LOCAL_MACHINE, L"SOFTWARE\\bethesda softworks\\skyrim", L"installed path", RRF_RT_ANY, nullptr, &skyrimPathC[0], &size);
 		std::wstring skyrimPath(&skyrimPathC[0]);
-		settings.putString(L"compilerPath", skyrimPath + L"Papyrus Compiler");
+		settings.putString(L"compilerPath", skyrimPath + L"Papyrus Compiler\\PapyrusCompiler.exe");
 		settings.putString(L"importDirectories", skyrimPath + L"Data\\Scripts\\Source");
 		settings.putString(L"outputDirectory", skyrimPath + L"Data\\Scripts");
 		settings.putString(L"flagFile", L"TESV_Papyrus_Flags.flg");
@@ -88,7 +96,31 @@ void init() {
 void cleanUp() {
 }
 
+LRESULT CALLBACK messageHandleProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam) {
+	switch (message)
+	{
+	case PPPM_COMPILATIONDONE:
+		::SendMessage(nppData._nppHandle, NPPM_SETSTATUSBAR, STATUSBAR_DOC_TYPE, reinterpret_cast<LPARAM>(L"Compilation successful"));
+		return 0;
+	case PPPM_COMPILATIONFAILED:
+		::MessageBox(nullptr, reinterpret_cast<wchar_t*>(wParam), L"", MB_OK);
+		::SendMessage(nppData._nppHandle, NPPM_SETSTATUSBAR, STATUSBAR_DOC_TYPE, reinterpret_cast<LPARAM>(L"Compilation failed"));
+		return 0;
+	case PPPM_COMPILERNOTFOUND:
+		::MessageBox(nppData._nppHandle, L"Can't find the compiler executable", L"Papyrus error", MB_OK);
+		return 0;
+	default:
+		return DefWindowProc(window, message, wParam, lParam);
+	}
+}
+
 void compile() {
+	static CompilationThread compilationThread(messageHandle, settings);
+
+	::SendMessage(nppData._nppHandle, NPPM_SETSTATUSBAR, STATUSBAR_DOC_TYPE, reinterpret_cast<LPARAM>(L"Compiling..."));
+	wchar_t inputFile[MAX_PATH];
+	::SendMessage(nppData._nppHandle, NPPM_GETFULLCURRENTPATH, MAX_PATH, (LPARAM)inputFile);
+	compilationThread.start(std::wstring(inputFile));
 }
 
 void settingsWindow() {

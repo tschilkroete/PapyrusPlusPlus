@@ -19,18 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include <string>
-#include <vector>
-
-class Settings
-{
-public:
-	Settings();
-	bool load(std::wstring configDir);
-	void save();
-	std::wstring getString(std::wstring key, std::wstring defaultValue = L"") const;
-	void putString(std::wstring key, std::wstring value);
-private:
-	std::wstring settingsPath;
-	std::vector<std::pair<std::wstring, std::wstring>> data;
-};
+#define PPPM_COMPILATIONDONE WM_USER
+#define PPPM_COMPILATIONFAILED (WM_USER + 1)
+#define PPPM_COMPILERNOTFOUND (WM_USER + 2)
