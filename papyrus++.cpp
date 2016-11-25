@@ -77,6 +77,7 @@ void init() {
 		settings.putString(L"compilerPath", skyrimPath + L"Papyrus Compiler");
 		settings.putString(L"importDirectories", skyrimPath + L"Data\\Scripts\\Source");
 		settings.putString(L"outputDirectory", skyrimPath + L"Data\\Scripts");
+		settings.putString(L"flagFile", L"TESV_Papyrus_Flags.flg");
 		settings.putString(L"additionalArguments", L"");
 		settings.save();
 

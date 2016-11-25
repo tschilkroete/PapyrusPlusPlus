@@ -30,12 +30,13 @@ SettingsWindow::SettingsWindow(Settings& settings, HINSTANCE instance, HWND pare
 	windowClass.lpszClassName = SETTINGS_CLASS_NAME;
 	::RegisterClass(&windowClass);
 
-	HWND window = ::CreateWindow(SETTINGS_CLASS_NAME, SETTINGS_CLASS_NAME, WS_OVERLAPPED | WS_SYSMENU, CW_USEDEFAULT, CW_USEDEFAULT, 755, 160, parent, nullptr, nullptr, nullptr);
+	HWND window = ::CreateWindow(SETTINGS_CLASS_NAME, SETTINGS_CLASS_NAME, WS_OVERLAPPED | WS_SYSMENU, CW_USEDEFAULT, CW_USEDEFAULT, 755, 190, parent, nullptr, instance, nullptr);
 	::SetWindowLong(window, GWLP_USERDATA, (LONG)this);
-	compilerPath = ::CreateWindow(L"EDIT", settings.getString(L"compilerPath").c_str(), WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL, 160, 10, 580, 20, window, nullptr, nullptr, nullptr);
-	importDirectories = ::CreateWindow(L"EDIT", settings.getString(L"importDirectories").c_str(), WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL, 160, 40, 580, 20, window, nullptr, nullptr, nullptr);
-	outputDirectory = ::CreateWindow(L"EDIT", settings.getString(L"outputDirectory").c_str(), WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL, 160, 70, 580, 20, window, nullptr, nullptr, nullptr);
-	additionalArguments = ::CreateWindow(L"EDIT", settings.getString(L"additionalArguments").c_str(), WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL, 160, 100, 580, 20, window, nullptr, nullptr, nullptr);
+	compilerPath = ::CreateWindow(L"EDIT", settings.getString(L"compilerPath").c_str(), WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL, 160, 10, 580, 20, window, nullptr, instance, nullptr);
+	importDirectories = ::CreateWindow(L"EDIT", settings.getString(L"importDirectories").c_str(), WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL, 160, 40, 580, 20, window, nullptr, instance, nullptr);
+	outputDirectory = ::CreateWindow(L"EDIT", settings.getString(L"outputDirectory").c_str(), WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL, 160, 70, 580, 20, window, nullptr, instance, nullptr);
+	flagFile = ::CreateWindow(L"EDIT", settings.getString(L"flagFile").c_str(), WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL, 160, 100, 580, 20, window, nullptr, instance, nullptr);
+	additionalArguments = ::CreateWindow(L"EDIT", settings.getString(L"additionalArguments").c_str(), WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL, 160, 130, 580, 20, window, nullptr, instance, nullptr);
 	::ShowWindow(window, SW_SHOWNORMAL);
 
 	MSG msg;
@@ -49,6 +50,7 @@ void SettingsWindow::save() {
 	settings.putString(L"compilerPath", getText(compilerPath));
 	settings.putString(L"importDirectories", getText(importDirectories));
 	settings.putString(L"outputDirectory", getText(outputDirectory));
+	settings.putString(L"flagFile", getText(flagFile));
 	settings.putString(L"additionalArguments", getText(additionalArguments));
 	settings.save();
 }
@@ -75,7 +77,8 @@ LRESULT SettingsWindow::windowProcedure(HWND window, UINT message, WPARAM wParam
 		::TextOut(hdc, 10, 12, L"Compiler path:", 14);
 		::TextOut(hdc, 10, 42, L"Import directories:", 19);
 		::TextOut(hdc, 10, 72, L"Output directory:", 17);
-		::TextOut(hdc, 10, 102, L"Additional arguments:", 21);
+		::TextOut(hdc, 10, 102, L"Flag file:", 10);
+		::TextOut(hdc, 10, 132, L"Additional arguments:", 21);
 
 		::EndPaint(window, &paintstruct);
 		return 0;

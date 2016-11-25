@@ -37,5 +37,6 @@ private:
 	HWND compilerPath;
 	HWND importDirectories;
 	HWND outputDirectory;
+	HWND flagFile;
 	HWND additionalArguments;
 };
