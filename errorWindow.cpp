@@ -72,6 +72,16 @@ BOOL CALLBACK ErrorWindow::run_dlgProc(UINT message, WPARAM wParam, LPARAM lPara
 	case WM_SIZE: {
 		resize();
 		return 0;
+	} case WM_NOTIFY:{
+		NMITEMACTIVATE* item = (NMITEMACTIVATE*)lParam;
+		if (item->hdr.hwndFrom == listView && item->hdr.code == NM_DBLCLK) {
+			int scintilla;
+			::SendMessage(nppData._nppHandle, NPPM_GETCURRENTSCINTILLA, 0, reinterpret_cast<LPARAM>(&scintilla));
+			wchar_t line[8];
+			ListView_GetItemText(listView, item->iItem, 1, line, 8);
+			::SendMessage(scintilla ? nppData._scintillaSecondHandle : nppData._scintillaMainHandle, SCI_GOTOLINE, std::stoi(std::wstring(line)) - 1, 0);
+		} else
+			return DockingDlgInterface::run_dlgProc(message, wParam, lParam);
 	}default:
 		return DockingDlgInterface::run_dlgProc(message, wParam, lParam);
 	}
