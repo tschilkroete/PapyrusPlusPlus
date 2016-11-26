@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include "errorWindow.hpp"
 #include "messages.hpp"
 #include "papyrus++.hpp"
 #include "settingsWindow.hpp"
@@ -97,29 +98,44 @@ void cleanUp() {
 }
 
 LRESULT CALLBACK messageHandleProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam) {
+	static ErrorWindow errorWindow(nppData, instance);
+	errorWindow.clear();
 	switch (message)
 	{
-	case PPPM_COMPILATIONDONE:
-		::SendMessage(nppData._nppHandle, NPPM_SETSTATUSBAR, STATUSBAR_DOC_TYPE, reinterpret_cast<LPARAM>(L"Compilation successful"));
-		return 0;
-	case PPPM_COMPILATIONFAILED:
-		::MessageBox(nullptr, reinterpret_cast<wchar_t*>(wParam), L"", MB_OK);
-		::SendMessage(nppData._nppHandle, NPPM_SETSTATUSBAR, STATUSBAR_DOC_TYPE, reinterpret_cast<LPARAM>(L"Compilation failed"));
-		return 0;
-	case PPPM_COMPILERNOTFOUND:
-		::MessageBox(nppData._nppHandle, L"Can't find the compiler executable", L"Papyrus error", MB_OK);
-		return 0;
-	default:
-		return DefWindowProc(window, message, wParam, lParam);
+		case PPPM_COMPILATIONDONE: {
+			::SendMessage(nppData._nppHandle, NPPM_SETSTATUSBAR, STATUSBAR_DOC_TYPE, reinterpret_cast<LPARAM>(L"Compilation successful"));
+			return 0;
+		}case PPPM_COMPILATIONFAILED: {
+			std::wstring output = reinterpret_cast<wchar_t*>(wParam);
+			std::vector<Error> errors;
+			while (!output.empty()) {
+				std::wstring line = output.substr(0, output.find_first_of(L"\r\n"));
+				output.erase(0, line.size() + 2);
+				Error error;
+				int bracketStartIndex = line.find_first_of(L'(');
+				error.line = std::stoi(line.substr(bracketStartIndex + 1, line.find_first_of(L',') - (bracketStartIndex + 1)));
+				int commaIndex = line.find_first_of(L',');
+				error.column = std::stoi(line.substr(commaIndex + 1, line.find_first_of(L')') - (commaIndex - 1)));
+				error.message = line.substr(line.find_first_of(L')') + 3);
+				errors.push_back(error);
+			}
+			errorWindow.show(errors);
+			::SendMessage(nppData._nppHandle, NPPM_SETSTATUSBAR, STATUSBAR_DOC_TYPE, reinterpret_cast<LPARAM>(L"Compilation failed"));
+			return 0;
+		}case PPPM_COMPILERNOTFOUND: {
+			::MessageBox(nppData._nppHandle, L"Can't find the compiler executable", L"Papyrus error", MB_OK);
+			return 0;
+		}default:
+			return DefWindowProc(window, message, wParam, lParam);
 	}
 }
 
 void compile() {
-	static CompilationThread compilationThread(messageHandle, settings);
-
 	::SendMessage(nppData._nppHandle, NPPM_SETSTATUSBAR, STATUSBAR_DOC_TYPE, reinterpret_cast<LPARAM>(L"Compiling..."));
 	wchar_t inputFile[MAX_PATH];
 	::SendMessage(nppData._nppHandle, NPPM_GETFULLCURRENTPATH, MAX_PATH, (LPARAM)inputFile);
+
+	static CompilationThread compilationThread(messageHandle, settings);
 	compilationThread.start(std::wstring(inputFile));
 }
 
