@@ -21,8 +21,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "errorWindow.hpp"
 #include "messages.hpp"
+#include "papyrusLexer.hpp"
 #include "papyrus++.hpp"
 #include "settingsWindow.hpp"
+
+#include "scintilla\LexerModule.h"
 
 #include <string>
 
@@ -35,30 +38,46 @@ BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID) {
 	return TRUE;
 }
 
-extern "C" __declspec(dllexport)  const TCHAR* getName() {
+const TCHAR* getName() {
 	return PLUGIN_NAME;
 }
 
-extern "C" __declspec(dllexport) BOOL isUnicode() {
+BOOL isUnicode() {
 	return true;
 }
 
-extern "C" __declspec(dllexport) void setInfo(NppData nppData) {
+void setInfo(NppData nppData) {
 	::nppData = nppData;
 	init();
 }
 
-extern "C" __declspec(dllexport) FuncItem* getFuncsArray(int* count) {
+FuncItem* getFuncsArray(int* count) {
 	*count = funcCount;
 	return funcs;
 }
 
-extern "C" __declspec(dllexport) void beNotified(SCNotification* notification) {
+void beNotified(SCNotification* notification) {
 
 }
 
-extern "C" __declspec(dllexport) LRESULT messageProc(UINT message, WPARAM wParam, LPARAM lParam) {
+LRESULT messageProc(UINT message, WPARAM wParam, LPARAM lParam) {
 	return TRUE;
+}
+ 
+int SCI_METHOD GetLexerCount() {
+	return 1;
+}
+
+void SCI_METHOD GetLexerName(int i, char* name, int length) {
+	strcpy_s(name, length, "Papyrus");
+}
+
+void SCI_METHOD GetLexerStatusText(int i, wchar_t* text, int length) {
+	wcscpy_s(text, length, L"Papyrus Script");
+}
+
+LexerFactoryFunction SCI_METHOD GetLexerFactory(int index) {
+	return PapyrusLexer::lexerFactory;
 }
 
 void init() {
