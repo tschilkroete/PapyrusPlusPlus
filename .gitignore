@@ -1,4 +1,4 @@
-npp/
 Debug/
+Release/
 
 *.vcxproj*
