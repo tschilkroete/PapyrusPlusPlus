@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include "scintilla\ILexer.h"
-#include <cstdlib>
+#include "scintilla\PropSetSimple.h"
 
 class PapyrusLexer : public ILexer
 {
@@ -39,4 +39,10 @@ public:
 	virtual void SCI_METHOD Lex(unsigned int startPos, int lengthDoc, int initStyle, IDocument *pAccess);
 	virtual void SCI_METHOD Fold(unsigned int startPos, int lengthDoc, int initStyle, IDocument *pAccess);
 	virtual void * SCI_METHOD PrivateCall(int operation, void *pointer);
+private:
+	enum State {
+		DEFAULT,
+		COMMENTLINE,
+		COMMENT
+	};
 };
