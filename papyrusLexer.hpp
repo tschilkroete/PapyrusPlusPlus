@@ -19,9 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include <cassert>
 #include "scintilla\ILexer.h"
+#include "scintilla\LexAccessor.h"
 #include "scintilla\PropSetSimple.h"
+#include "scintilla\StyleContext.h"
 #include "scintilla\WordList.h"
+#include "scintilla\Accessor.h"
 
 class PapyrusLexer : public ILexer
 {
@@ -44,7 +48,10 @@ private:
 	enum State {
 		DEFAULT,
 		COMMENT,
-		TYPE
+		TYPE,
+		FLOWCONTROL
 	};
 	WordList wordListTypes;
+	WordList wordListFlowControl;
+	void styleWordList(StyleContext& styleContext, const WordList& wordList, State state);
 };

@@ -19,11 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "PapyrusLexer.hpp"
 
-#include <cassert>
-#include "scintilla\LexAccessor.h"
-#include "scintilla\Accessor.h"
-#include "scintilla\StyleContext.h"
-
 #include <locale>
 
 int SCI_METHOD PapyrusLexer::Version() const {return 0;}
@@ -39,6 +34,9 @@ int SCI_METHOD PapyrusLexer::WordListSet(int n, const char *wl) {
 	switch (n) {
 	case TYPE:
 		wordList = &wordListTypes;
+		break;
+	case FLOWCONTROL:
+		wordList = &wordListFlowControl;
 		break;
 	}
 	if (wordList) {
@@ -69,17 +67,8 @@ void SCI_METHOD PapyrusLexer::Lex(unsigned int startPos, int lengthDoc, int init
 			while (!styleContext.atLineEnd) styleContext.Forward();
 			styleContext.SetState(DEFAULT);
 		}
-		if (!isalpha(styleContext.chPrev) && isalpha(styleContext.ch)) {
-			for (int i = 0; i < wordListTypes.Length(); i++) {
-				int length = strlen(wordListTypes.WordAt(i));
-				if (styleContext.MatchIgnoreCase(wordListTypes.WordAt(i)) && !isalpha(styleContext.GetRelative(length))) {
-					styleContext.SetState(TYPE);
-					styleContext.Forward(length);
-					styleContext.SetState(DEFAULT);
-					break;
-				}
-			}
-		}
+		styleWordList(styleContext, wordListTypes, TYPE);
+		styleWordList(styleContext, wordListFlowControl, FLOWCONTROL);
 		styleContext.Forward();
 	}
 	accessor.Flush();
@@ -91,4 +80,18 @@ void SCI_METHOD PapyrusLexer::Fold(unsigned int startPos, int lengthDoc, int ini
 
 void * SCI_METHOD PapyrusLexer::PrivateCall(int operation, void *pointer) {
 	return nullptr;
+}
+
+void PapyrusLexer::styleWordList(StyleContext& styleContext, const WordList& wordList, State state) {
+	if (!isalpha(styleContext.chPrev) && styleContext.chPrev != '_' && isalpha(styleContext.ch)) {
+		for (int i = 0; i < wordList.Length(); i++) {
+			int length = strlen(wordList.WordAt(i));
+			if (styleContext.MatchIgnoreCase(wordList.WordAt(i)) && !isalpha(styleContext.GetRelative(length)) && styleContext.GetRelative(length) != '_') {
+				styleContext.SetState(state);
+				styleContext.Forward(length);
+				styleContext.SetState(DEFAULT);
+				break;
+			}
+		}
+	}
 }
