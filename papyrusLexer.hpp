@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "scintilla\ILexer.h"
 #include "scintilla\PropSetSimple.h"
+#include "scintilla\WordList.h"
 
 class PapyrusLexer : public ILexer
 {
@@ -42,7 +43,8 @@ public:
 private:
 	enum State {
 		DEFAULT,
-		COMMENTLINE,
-		COMMENT
+		COMMENT,
+		TYPE
 	};
+	WordList wordListTypes;
 };
