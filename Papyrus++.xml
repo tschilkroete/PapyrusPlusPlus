@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <Language name="Papyrus" ext="psc" commentLine="; " commentStart="{" commentEnd="}">
       <Keywords name="2">int float bool string</Keywords>
       <Keywords name="3">if else elseif endif while endwhile</Keywords>
+      <Keywords name="4">state endstate property endproperty event endevent function endfunction function endfunction autoreadonly as new auto none return import self</Keywords>
     </Language>
   </Languages>
 	<LexerStyles>
@@ -32,6 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <WordsStyle name="COMMENT" styleID="1" fgColor="AAAAAA" bgColor="FFFFFF"/>
       <WordsStyle name="TYPE" styleID="2" fgColor="6060FF" bgColor="FFFFFF" keywordClass="2"/>
       <WordsStyle name="FLOWCONTROL" styleID="3" fgColor="FF2020" bgColor="FFFFFF" keywordClass="3"/>
+      <WordsStyle name="KEYWORDS" styleID="4" fgColor="0000FF" bgColor="FFFFFF" keywordClass="4"/>
     </LexerType>
   </LexerStyles>
 </NotepadPlus>

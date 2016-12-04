@@ -49,9 +49,11 @@ private:
 		DEFAULT,
 		COMMENT,
 		TYPE,
-		FLOWCONTROL
+		FLOWCONTROL,
+		KEYWORDS
 	};
 	WordList wordListTypes;
 	WordList wordListFlowControl;
+	WordList wordListKeywords;
 	void styleWordList(StyleContext& styleContext, const WordList& wordList, State state);
 };

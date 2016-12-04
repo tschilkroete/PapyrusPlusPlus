@@ -38,6 +38,8 @@ int SCI_METHOD PapyrusLexer::WordListSet(int n, const char *wl) {
 	case FLOWCONTROL:
 		wordList = &wordListFlowControl;
 		break;
+	case KEYWORDS:
+		wordList = &wordListKeywords;
 	}
 	if (wordList) {
 		WordList newList;
@@ -69,6 +71,7 @@ void SCI_METHOD PapyrusLexer::Lex(unsigned int startPos, int lengthDoc, int init
 		}
 		styleWordList(styleContext, wordListTypes, TYPE);
 		styleWordList(styleContext, wordListFlowControl, FLOWCONTROL);
+		styleWordList(styleContext, wordListKeywords, KEYWORDS);
 		styleContext.Forward();
 	}
 	accessor.Flush();
