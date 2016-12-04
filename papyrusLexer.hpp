@@ -49,7 +49,8 @@ private:
 		DEFAULT,
 		TYPE,
 		FLOWCONTROL,
-		KEYWORDS,
+		KEYWORD,
+		OPERATOR,
 		COMMENT,
 		COMMENTDOC,
 		COMMENTMULTILINE
@@ -58,6 +59,7 @@ private:
 	WordList wordListTypes;
 	WordList wordListFlowControl;
 	WordList wordListKeywords;
+	WordList wordListOperators;
 	void styleWordList(StyleContext& styleContext, const WordList& wordList, State state);
 	bool styleComment(StyleContext& styleContext, const char* start, const char* end, State stateComment, int& stateInit);
 };

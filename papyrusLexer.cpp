@@ -38,8 +38,11 @@ int SCI_METHOD PapyrusLexer::WordListSet(int n, const char *wl) {
 	case FLOWCONTROL:
 		wordList = &wordListFlowControl;
 		break;
-	case KEYWORDS:
+	case KEYWORD:
 		wordList = &wordListKeywords;
+		break;
+	case OPERATOR:
+		wordList = &wordListOperators;
 	}
 	if (wordList) {
 		WordList newList;
@@ -66,9 +69,22 @@ void SCI_METHOD PapyrusLexer::Lex(unsigned int startPos, int lengthDoc, int stat
 			while (!styleContext.atLineEnd) styleContext.Forward();
 			styleContext.SetState(DEFAULT);
 		}
+
 		styleWordList(styleContext, wordListTypes, TYPE);
 		styleWordList(styleContext, wordListFlowControl, FLOWCONTROL);
-		styleWordList(styleContext, wordListKeywords, KEYWORDS);
+		styleWordList(styleContext, wordListKeywords, KEYWORD);
+		bool found = false;
+		for (int i = 0; i < wordListOperators.Length(); i++) {
+			if (styleContext.Match(wordListOperators.WordAt(i))) {
+				styleContext.SetState(OPERATOR);
+				styleContext.Forward(strlen(wordListOperators.WordAt(i)));
+				found = true;
+				break;
+			}
+		}
+		if (found)
+			continue;
+
 		styleContext.Forward();
 	}
 	accessor.Flush();
@@ -105,7 +121,6 @@ bool PapyrusLexer::styleComment(StyleContext & styleContext, const char * start,
 			styleContext.Forward();
 		}
 		styleContext.Forward(strlen(end));
-		styleContext.SetState(DEFAULT);
 		return true;
 	}
 	return false;
