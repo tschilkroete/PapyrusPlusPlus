@@ -41,19 +41,23 @@ public:
 	virtual int SCI_METHOD PropertySet(const char *key, const char *val);
 	virtual const char * SCI_METHOD DescribeWordListSets();
 	virtual int SCI_METHOD WordListSet(int n, const char *wl);
-	virtual void SCI_METHOD Lex(unsigned int startPos, int lengthDoc, int initStyle, IDocument *pAccess);
-	virtual void SCI_METHOD Fold(unsigned int startPos, int lengthDoc, int initStyle, IDocument *pAccess);
+	virtual void SCI_METHOD Lex(unsigned int startPos, int lengthDoc, int stateInit, IDocument *pAccess);
+	virtual void SCI_METHOD Fold(unsigned int startPos, int lengthDoc, int stateInit, IDocument *pAccess);
 	virtual void * SCI_METHOD PrivateCall(int operation, void *pointer);
 private:
 	enum State {
 		DEFAULT,
-		COMMENT,
 		TYPE,
 		FLOWCONTROL,
-		KEYWORDS
+		KEYWORDS,
+		COMMENT,
+		COMMENTDOC,
+		COMMENTMULTILINE
 	};
+
 	WordList wordListTypes;
 	WordList wordListFlowControl;
 	WordList wordListKeywords;
 	void styleWordList(StyleContext& styleContext, const WordList& wordList, State state);
+	bool styleComment(StyleContext& styleContext, const char* start, const char* end, State stateComment, int& stateInit);
 };

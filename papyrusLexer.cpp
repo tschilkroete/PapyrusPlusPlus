@@ -52,18 +52,15 @@ int SCI_METHOD PapyrusLexer::WordListSet(int n, const char *wl) {
 	return -1;
 }
 
-void SCI_METHOD PapyrusLexer::Lex(unsigned int startPos, int lengthDoc, int initStyle, IDocument *pAccess) {
+void SCI_METHOD PapyrusLexer::Lex(unsigned int startPos, int lengthDoc, int stateInit, IDocument *pAccess) {
 	Accessor accessor(pAccess, nullptr);
-	StyleContext  styleContext(startPos, lengthDoc, initStyle, accessor);
+	StyleContext  styleContext(startPos, lengthDoc, stateInit, accessor);
 	while (styleContext.More()) {
 		styleContext.SetState(DEFAULT);
-		if (styleContext.ch == '{' || initStyle == COMMENT) {
-			initStyle = DEFAULT;
-			styleContext.SetState(COMMENT);
-			while (styleContext.More() && styleContext.chPrev != '}') styleContext.Forward();
-			styleContext.SetState(DEFAULT);
-			continue;
-		}
+
+		if (styleComment(styleContext, "{", "}", COMMENTDOC, stateInit)) continue;
+		if (styleComment(styleContext, ";/", "/;", COMMENTMULTILINE, stateInit)) continue;
+
 		if (styleContext.ch == ';') {
 			styleContext.SetState(COMMENT);
 			while (!styleContext.atLineEnd) styleContext.Forward();
@@ -97,4 +94,19 @@ void PapyrusLexer::styleWordList(StyleContext& styleContext, const WordList& wor
 			}
 		}
 	}
+}
+
+bool PapyrusLexer::styleComment(StyleContext & styleContext, const char * start, const char * end, State stateComment, int& stateInit) {
+	if (styleContext.Match(start) || stateInit == stateComment) {
+		stateInit = DEFAULT;
+		styleContext.SetState(stateComment);
+		styleContext.Forward(strlen(start));
+		while (styleContext.More() && !styleContext.Match(end)) {
+			styleContext.Forward();
+		}
+		styleContext.Forward(strlen(end));
+		styleContext.SetState(DEFAULT);
+		return true;
+	}
+	return false;
 }
