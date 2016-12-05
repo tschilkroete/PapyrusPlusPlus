@@ -53,7 +53,8 @@ private:
 		OPERATOR,
 		COMMENT,
 		COMMENTDOC,
-		COMMENTMULTILINE
+		COMMENTMULTILINE,
+		NUMBER
 	};
 
 	WordList wordListTypes;

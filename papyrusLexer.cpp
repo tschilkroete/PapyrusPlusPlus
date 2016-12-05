@@ -70,6 +70,15 @@ void SCI_METHOD PapyrusLexer::Lex(unsigned int startPos, int lengthDoc, int stat
 			styleContext.SetState(DEFAULT);
 		}
 
+		if (isdigit(styleContext.ch) && !isalnum(styleContext.chPrev) && styleContext.chPrev != '_') {
+			styleContext.SetState(NUMBER);
+			do {
+				styleContext.Forward();
+			} while (isdigit(styleContext.ch) || styleContext.ch == '.');
+			styleContext.SetState(DEFAULT);
+			continue;
+		}
+
 		styleWordList(styleContext, wordListTypes, TYPE);
 		styleWordList(styleContext, wordListFlowControl, FLOWCONTROL);
 		styleWordList(styleContext, wordListKeywords, KEYWORD);
