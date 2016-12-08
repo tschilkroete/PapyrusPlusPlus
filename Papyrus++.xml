@@ -21,10 +21,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <NotepadPlus>
   <Languages>
-    <Language name="Papyrus" ext="psc" commentLine="; " commentStart="{" commentEnd="}">
+    <Language name="Papyrus" ext="psc" commentLine="; " commentStart=";/" commentEnd="/;">
       <Keywords name="1">int float bool string</Keywords>
       <Keywords name="2">if else elseif endif while endwhile</Keywords>
-      <Keywords name="3">state endstate property endproperty event endevent function endfunction function endfunction autoreadonly as new auto none return import self extends scriptname length</Keywords>
+      <Keywords name="3">state endstate property endproperty event endevent function endfunction autoreadonly as new auto none return import self extends scriptname length</Keywords>
       <Keywords name="4">+ += - -= * *= / /= % %= ! || &amp;&amp; &lt; &lt;= &gt; &gt;= == != = .</Keywords>
     </Language>
   </Languages>

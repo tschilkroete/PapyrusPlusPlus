@@ -28,7 +28,7 @@ Settings::Settings() {
 }
 
 bool Settings::load(std::wstring configDir) {
-	settingsPath = configDir + L"\\papyrus++.ini";
+	settingsPath = configDir + L"\\Papyrus++.ini";
 
 	std::wifstream settingsFile(settingsPath);
 	settingsFile.imbue(std::locale(settingsFile.getloc(), new std::codecvt_utf8<wchar_t>()));
