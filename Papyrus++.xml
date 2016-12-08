@@ -39,6 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <WordsStyle name="COMMENTDOC" styleID="6" fgColor="777777" bgColor="FFFFFF"/>
       <WordsStyle name="COMMENTMULTILINE" styleID="7" fgColor="AAAAAA" bgColor="FFFFFF"/>
       <WordsStyle name="NUMBER" styleID="8" fgColor="AA8800" bgColor="FFFFFF"/>
+      <WordsStyle name="STRING" styleID="9" fgColor="007700" bgColor="FFFFFF"/>
     </LexerType>
   </LexerStyles>
 </NotepadPlus>

@@ -72,6 +72,14 @@ void SCI_METHOD PapyrusLexer::Lex(unsigned int startPos, int lengthDoc, int stat
 			styleContext.SetState(DEFAULT);
 		}
 
+		if (styleContext.ch == '"') {
+			styleContext.SetState(STRING);
+			styleContext.Forward();
+			while (!styleContext.atLineEnd && styleContext.ch != '"') styleContext.Forward();
+			styleContext.ForwardSetState(DEFAULT);
+			continue;
+		}
+
 		if (isdigit(styleContext.ch) && !isalnum(styleContext.chPrev) && styleContext.chPrev != '_') {
 			styleContext.SetState(NUMBER);
 			do {

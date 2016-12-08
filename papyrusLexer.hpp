@@ -54,7 +54,8 @@ private:
 		COMMENT,
 		COMMENTDOC,
 		COMMENTMULTILINE,
-		NUMBER
+		NUMBER,
+		STRING
 	};
 	static constexpr const char* foldStarts[] = {"if", "while", "function", "event"};
 	static constexpr const char* foldEnds[] = {"endif", "endwhile", "endfunction", "endevent"};
