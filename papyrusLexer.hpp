@@ -41,8 +41,8 @@ public:
 	virtual int SCI_METHOD PropertySet(const char *key, const char *val);
 	virtual const char * SCI_METHOD DescribeWordListSets();
 	virtual int SCI_METHOD WordListSet(int n, const char *wl);
-	virtual void SCI_METHOD Lex(unsigned int startPos, int lengthDoc, int stateInit, IDocument *pAccess);
-	virtual void SCI_METHOD Fold(unsigned int startPos, int lengthDoc, int stateInit, IDocument *pAccess);
+	virtual void SCI_METHOD Lex(unsigned int startPos, int lengthDoc, int stateInit, IDocument *idocument);
+	virtual void SCI_METHOD Fold(unsigned int startPos, int lengthDoc, int stateInit, IDocument *idocument);
 	virtual void * SCI_METHOD PrivateCall(int operation, void *pointer);
 private:
 	enum State {
@@ -56,7 +56,8 @@ private:
 		COMMENTMULTILINE,
 		NUMBER
 	};
-
+	static constexpr const char* foldStarts[] = {"if", "while", "function", "event"};
+	static constexpr const char* foldEnds[] = {"endif", "endwhile", "endfunction", "endevent"};
 	WordList wordListTypes;
 	WordList wordListFlowControl;
 	WordList wordListKeywords;

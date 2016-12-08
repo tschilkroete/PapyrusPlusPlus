@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "PapyrusLexer.hpp"
 
+#include "scintilla\Scintilla.h"
+
 #include <locale>
 
 int SCI_METHOD PapyrusLexer::Version() const {return 0;}
@@ -55,8 +57,8 @@ int SCI_METHOD PapyrusLexer::WordListSet(int n, const char *wl) {
 	return -1;
 }
 
-void SCI_METHOD PapyrusLexer::Lex(unsigned int startPos, int lengthDoc, int stateInit, IDocument *pAccess) {
-	Accessor accessor(pAccess, nullptr);
+void SCI_METHOD PapyrusLexer::Lex(unsigned int startPos, int lengthDoc, int stateInit, IDocument *idocument) {
+	Accessor accessor(idocument, nullptr);
 	StyleContext  styleContext(startPos, lengthDoc, stateInit, accessor);
 	while (styleContext.More()) {
 		styleContext.SetState(DEFAULT);
@@ -99,8 +101,42 @@ void SCI_METHOD PapyrusLexer::Lex(unsigned int startPos, int lengthDoc, int stat
 	accessor.Flush();
 }
 
-void SCI_METHOD PapyrusLexer::Fold(unsigned int startPos, int lengthDoc, int initStyle, IDocument *pAccess) {
-
+void SCI_METHOD PapyrusLexer::Fold(unsigned int startPos, int lengthDoc, int initStyle, IDocument *idocument) {
+	Accessor accessor(idocument, nullptr);
+	int levelPrev = accessor.LevelAt(accessor.GetLine(startPos)) & SC_FOLDLEVELNUMBERMASK;
+	//Lines
+	for (int line = accessor.GetLine(startPos); line <= accessor.GetLine(startPos + lengthDoc); line++) {
+		int levelDelta = 0;
+		//Chars
+		for (int charIndex = accessor.LineStart(line); charIndex <= accessor.LineEnd(line); charIndex++) {
+			char style = accessor.StyleAt(charIndex);
+			if (style != COMMENT && style != COMMENTDOC && style != COMMENTMULTILINE
+				&& !isalnum(accessor.SafeGetCharAt(charIndex - 1)) && accessor.SafeGetCharAt(charIndex - 1) != '_') {
+				for (const char* start : foldStarts) {
+					if (accessor.Match(charIndex, start)) {
+						levelDelta++;
+						break;
+					}
+				}
+				if (levelDelta == 0) {
+					for (const char* end : foldEnds) {
+						if (accessor.Match(charIndex, end)) {
+							levelDelta--;
+							break;
+						}
+					}
+				}
+				if (levelDelta != 0)
+					break;
+			}
+		}
+		int level = levelPrev;
+		if (levelDelta == 1) {
+			level |= SC_FOLDLEVELHEADERFLAG;
+		}
+		accessor.SetLevel(line, level);
+		levelPrev += levelDelta;
+	}
 }
 
 void * SCI_METHOD PapyrusLexer::PrivateCall(int operation, void *pointer) {
