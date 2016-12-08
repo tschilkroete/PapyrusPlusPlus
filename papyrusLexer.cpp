@@ -84,7 +84,8 @@ void SCI_METHOD PapyrusLexer::Lex(unsigned int startPos, int lengthDoc, int stat
 			styleContext.SetState(NUMBER);
 			do {
 				styleContext.Forward();
-			} while (isdigit(styleContext.ch) || styleContext.ch == '.');
+			} while (isdigit(styleContext.ch) || styleContext.ch == '.' || styleContext.ch == 'x' || (styleContext.ch >= 65 && styleContext.ch <= 70)
+				|| (styleContext.ch >= 97 && styleContext.ch <= 102));
 			styleContext.SetState(DEFAULT);
 			continue;
 		}
