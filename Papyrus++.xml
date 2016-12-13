@@ -24,8 +24,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <Language name="Papyrus" ext="psc" commentLine="; " commentStart=";/" commentEnd="/;">
       <Keywords name="1">int float bool string</Keywords>
       <Keywords name="2">if else elseif endif while endwhile</Keywords>
-      <Keywords name="3">state endstate property endproperty event endevent function endfunction autoreadonly as new auto none return import self extends scriptname length</Keywords>
-      <Keywords name="4">+ += - -= * *= / /= % %= ! || &amp;&amp; &lt; &lt;= &gt; &gt;= == != = .</Keywords>
+      <Keywords name="3">if while state property event function</Keywords>
+      <Keywords name="4">endif endwhile endstate endproperty endevent endfunction</Keywords>
+      <Keywords name="5">state endstate property endproperty event endevent function endfunction autoreadonly as new auto none return import self extends scriptname length</Keywords>
+      <Keywords name="6">+ - * / = % ! | &amp; &lt; &gt; .</Keywords>
     </Language>
   </Languages>
 	<LexerStyles>
@@ -33,13 +35,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <WordsStyle name="DEFAULT" styleID="0" fgColor="000000" bgColor="FFFFFF"/>
       <WordsStyle name="TYPE" styleID="1" fgColor="6060FF" bgColor="FFFFFF" keywordClass="1"/>
       <WordsStyle name="FLOWCONTROL" styleID="2" fgColor="FF2020" bgColor="FFFFFF" keywordClass="2"/>
-      <WordsStyle name="KEYWORD" styleID="3" fgColor="0000FF" bgColor="FFFFFF" keywordClass="3"/>
-      <WordsStyle name="OPERATOR" styleID="4" fgColor="22AA22" bgColor="FFFFFF" keywordClass="4"/>
-      <WordsStyle name="COMMENT" styleID="5" fgColor="AAAAAA" bgColor="FFFFFF"/>
-      <WordsStyle name="COMMENTDOC" styleID="6" fgColor="777777" bgColor="FFFFFF"/>
-      <WordsStyle name="COMMENTMULTILINE" styleID="7" fgColor="AAAAAA" bgColor="FFFFFF"/>
-      <WordsStyle name="NUMBER" styleID="8" fgColor="AA8800" bgColor="FFFFFF"/>
-      <WordsStyle name="STRING" styleID="9" fgColor="007700" bgColor="FFFFFF"/>
+      <WordsStyle name="FOLDSTART" styleID="3" fgColor="000000" bgColor="000000" keywordClass="3"/>
+      <WordsStyle name="FOLDEND" styleID="4" fgColor="000000" bgColor="000000" keywordClass="4"/>
+      <WordsStyle name="KEYWORD" styleID="5" fgColor="0000FF" bgColor="FFFFFF" keywordClass="5"/>
+      <WordsStyle name="OPERATOR" styleID="6" fgColor="22AA22" bgColor="FFFFFF" keywordClass="6"/>
+      <WordsStyle name="COMMENT" styleID="7" fgColor="AAAAAA" bgColor="FFFFFF"/>
+      <WordsStyle name="COMMENTDOC" styleID="8" fgColor="777777" bgColor="FFFFFF"/>
+      <WordsStyle name="COMMENTMULTILINE" styleID="9" fgColor="AAAAAA" bgColor="FFFFFF"/>
+      <WordsStyle name="NUMBER" styleID="10" fgColor="AA8800" bgColor="FFFFFF"/>
+      <WordsStyle name="STRING" styleID="11" fgColor="007700" bgColor="FFFFFF"/>
+      <WordsStyle name="PROPERTY" styleID="12" fgColor="000000" bgColor="FFFFFF" fontStyle="1"/>
     </LexerType>
   </LexerStyles>
 </NotepadPlus>

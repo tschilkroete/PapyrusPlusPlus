@@ -27,6 +27,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "scintilla\WordList.h"
 #include "scintilla\Accessor.h"
 
+#include <list>
+#include <vector>
+
 class PapyrusLexer : public ILexer
 {
 public:
@@ -35,27 +38,30 @@ public:
 	}
 	virtual int SCI_METHOD Version() const;
 	virtual void SCI_METHOD Release();
-	virtual const char * SCI_METHOD PropertyNames();
-	virtual int SCI_METHOD PropertyType(const char *name);
-	virtual const char * SCI_METHOD DescribeProperty(const char *name);
-	virtual int SCI_METHOD PropertySet(const char *key, const char *val);
-	virtual const char * SCI_METHOD DescribeWordListSets();
-	virtual int SCI_METHOD WordListSet(int n, const char *wl);
-	virtual void SCI_METHOD Lex(unsigned int startPos, int lengthDoc, int stateInit, IDocument *idocument);
-	virtual void SCI_METHOD Fold(unsigned int startPos, int lengthDoc, int stateInit, IDocument *idocument);
-	virtual void * SCI_METHOD PrivateCall(int operation, void *pointer);
+	virtual const char* SCI_METHOD PropertyNames();
+	virtual int SCI_METHOD PropertyType(const char* name);
+	virtual const char* SCI_METHOD DescribeProperty(const char* name);
+	virtual int SCI_METHOD PropertySet(const char* key, const char* val);
+	virtual const char* SCI_METHOD DescribeWordListSets();
+	virtual int SCI_METHOD WordListSet(int n, const char* wl);
+	virtual void SCI_METHOD Lex(unsigned int startPos, int lengthDoc, int stateInit, IDocument* idocument);
+	virtual void SCI_METHOD Fold(unsigned int startPos, int lengthDoc, int stateInit, IDocument* idocument);
+	virtual void * SCI_METHOD PrivateCall(int operation, void* pointer);
 private:
 	enum State {
 		DEFAULT,
 		TYPE,
 		FLOWCONTROL,
+		FOLDSTART,
+		FOLDEND,
 		KEYWORD,
 		OPERATOR,
 		COMMENT,
 		COMMENTDOC,
 		COMMENTMULTILINE,
 		NUMBER,
-		STRING
+		STRING,
+		PROPERTY
 	};
 	static constexpr const char* foldStarts[] = {"if", "while", "function", "event"};
 	static constexpr const char* foldEnds[] = {"endif", "endwhile", "endfunction", "endevent"};
@@ -63,6 +69,35 @@ private:
 	WordList wordListFlowControl;
 	WordList wordListKeywords;
 	WordList wordListOperators;
-	void styleWordList(StyleContext& styleContext, const WordList& wordList, State state);
-	bool styleComment(StyleContext& styleContext, const char* start, const char* end, State stateComment, int& stateInit);
+	WordList wordListProperties;
+	WordList wordListFoldStart;
+	WordList wordListFoldEnd;
+	struct Property {
+		std::string name;
+		int line;
+	};
+	std::list<Property> propertyLines;
+	enum TokenType {
+		IDENTIFIER,
+		NUMERIC,
+		SPECIAL
+	};
+	struct Token {
+		std::string content;
+		TokenType tokenType;
+		unsigned int startPos;
+	};
+	std::vector<Token> tokenize(Accessor& accessor, int line);
+	void colorToken(StyleContext& styleContext, Token token, State state);
+	bool isAlphabetic(int ch) { return (ch >= 65 && ch <= 90) || (ch >= 97 && ch <= 122); }
+	bool isNumeric(int ch) { return ch >= 48 && ch <= 57; }
+	bool isHex(int ch) { return isNumeric(ch) || (ch >= 65 && ch <= 70) || (ch >= 97 && ch <= 102); }
+	bool isAlphanumeric(int ch) { return isAlphabetic(ch) || isNumeric(ch); }
+	int toLower(int ch) {
+		if (ch >= 65 && ch <= 90) {
+			return ch + 32;
+		} else {
+			return ch;
+		}
+	}
 };

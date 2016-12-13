@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "scintilla\Scintilla.h"
 
 #include <locale>
+#include <vector>
 
 int SCI_METHOD PapyrusLexer::Version() const {return 0;}
 void SCI_METHOD PapyrusLexer::Release() { delete this; }
@@ -45,6 +46,12 @@ int SCI_METHOD PapyrusLexer::WordListSet(int n, const char *wl) {
 		break;
 	case OPERATOR:
 		wordList = &wordListOperators;
+		break;
+	case FOLDSTART:
+		wordList = &wordListFoldStart;
+		break;
+	case FOLDEND:
+		wordList = &wordListFoldEnd;
 	}
 	if (wordList) {
 		WordList newList;
@@ -57,57 +64,74 @@ int SCI_METHOD PapyrusLexer::WordListSet(int n, const char *wl) {
 	return -1;
 }
 
-void SCI_METHOD PapyrusLexer::Lex(unsigned int startPos, int lengthDoc, int stateInit, IDocument *idocument) {
+void SCI_METHOD PapyrusLexer::Lex(unsigned int startPos, int lengthDoc, int stateInit, IDocument* idocument) {
 	Accessor accessor(idocument, nullptr);
-	StyleContext  styleContext(startPos, lengthDoc, stateInit, accessor);
-	while (styleContext.More()) {
-		styleContext.SetState(DEFAULT);
-
-		if (styleComment(styleContext, "{", "}", COMMENTDOC, stateInit)) continue;
-		if (styleComment(styleContext, ";/", "/;", COMMENTMULTILINE, stateInit)) continue;
-
-		if (styleContext.ch == ';') {
-			styleContext.SetState(COMMENT);
-			while (!styleContext.atLineEnd) styleContext.Forward();
-			styleContext.SetState(DEFAULT);
-		}
-
-		if (styleContext.ch == '"') {
-			styleContext.SetState(STRING);
-			styleContext.Forward();
-			while (!styleContext.atLineEnd && styleContext.ch != '"') styleContext.Forward();
-			styleContext.ForwardSetState(DEFAULT);
-			continue;
-		}
-
-		if (isdigit(styleContext.ch) && !isalnum(styleContext.chPrev) && styleContext.chPrev != '_') {
-			styleContext.SetState(NUMBER);
-			do {
-				styleContext.Forward();
-			} while (isdigit(styleContext.ch) || styleContext.ch == '.' || styleContext.ch == 'x' || (styleContext.ch >= 65 && styleContext.ch <= 70)
-				|| (styleContext.ch >= 97 && styleContext.ch <= 102));
-			styleContext.SetState(DEFAULT);
-			continue;
-		}
-
-		styleWordList(styleContext, wordListTypes, TYPE);
-		styleWordList(styleContext, wordListFlowControl, FLOWCONTROL);
-		styleWordList(styleContext, wordListKeywords, KEYWORD);
-		bool found = false;
-		for (int i = 0; i < wordListOperators.Length(); i++) {
-			if (styleContext.Match(wordListOperators.WordAt(i))) {
-				styleContext.SetState(OPERATOR);
-				styleContext.Forward(strlen(wordListOperators.WordAt(i)));
-				found = true;
-				break;
+	StyleContext  styleContext(startPos, lengthDoc, accessor.StyleAt(startPos - 1), accessor);
+	//This state is saved in the line feed character. It can be used to initialize the state of the next line
+	State messageStateLast = static_cast<State>(accessor.StyleAt(startPos - 1));
+	for (int line = accessor.GetLine(startPos); line <= accessor.GetLine(startPos + lengthDoc - 1); line++) {
+		std::vector<Token> tokens = tokenize(accessor, line);
+		State messageState = messageStateLast;
+		for (std::vector<Token>::iterator tokensIter = tokens.begin(); tokensIter != tokens.end(); tokensIter++) {
+			if (messageState == COMMENTDOC) {
+				colorToken(styleContext, *tokensIter, COMMENTDOC);
+				if ((*tokensIter).content == "}") {
+					messageState = DEFAULT;
+				}
+			} else if(messageState == COMMENTMULTILINE) {
+				colorToken(styleContext, *tokensIter, COMMENTMULTILINE);
+				if ((*tokensIter).content == ";" && tokensIter != tokens.begin() && (*std::prev(tokensIter)).content == "/") {
+					messageState = DEFAULT;
+				}
+			} else if(messageState == COMMENT){
+				colorToken(styleContext, *tokensIter, COMMENT);
+			} else {
+				//Determine the type of the token and color it
+				if ((*tokensIter).content == "{") {
+					colorToken(styleContext, *tokensIter, COMMENTDOC);
+					messageState = COMMENTDOC;
+				} else if ((*tokensIter).content == ";") {
+					if (std::next(tokensIter) != tokens.end() && (*std::next(tokensIter)).content == "/") {
+						colorToken(styleContext, *tokensIter, COMMENTMULTILINE);
+						messageState = COMMENTMULTILINE;
+					} else {
+						colorToken(styleContext, *tokensIter, COMMENT);
+						messageState = COMMENT;
+					}
+				} else if ((*tokensIter).tokenType == NUMERIC) {
+					colorToken(styleContext, *tokensIter, NUMBER);
+				} else if ((*tokensIter).tokenType == IDENTIFIER) {
+					if (wordListTypes.InList((*tokensIter).content.c_str())) {
+						colorToken(styleContext, *tokensIter, TYPE);
+					} else if (wordListFlowControl.InList((*tokensIter).content.c_str())) {
+						colorToken(styleContext, *tokensIter, FLOWCONTROL);
+					} else if (wordListKeywords.InList((*tokensIter).content.c_str())) {
+						colorToken(styleContext, *tokensIter, KEYWORD);
+					} else if (wordListOperators.InList((*tokensIter).content.c_str())) {
+						colorToken(styleContext, *tokensIter, TYPE);
+					} else {
+						colorToken(styleContext, *tokensIter, DEFAULT);
+					}
+				} else if ((*tokensIter).tokenType == SPECIAL) {
+					if (wordListOperators.InList((*tokensIter).content.c_str())) {
+						colorToken(styleContext, *tokensIter, OPERATOR);
+					} else {
+						colorToken(styleContext, *tokensIter, DEFAULT);
+					}
+				}
 			}
 		}
-		if (found)
-			continue;
-
-		styleContext.Forward();
+		if (messageState == COMMENT) {
+			messageState = DEFAULT;
+		}
+		if(styleContext.ch == '\r') styleContext.Forward();
+		if (styleContext.ch == '\n') {
+			styleContext.SetState(messageState);
+			styleContext.Forward();
+		}
+		messageStateLast = messageState;
 	}
-	accessor.Flush();
+	styleContext.Complete();
 }
 
 void SCI_METHOD PapyrusLexer::Fold(unsigned int startPos, int lengthDoc, int initStyle, IDocument *idocument) {
@@ -117,28 +141,19 @@ void SCI_METHOD PapyrusLexer::Fold(unsigned int startPos, int lengthDoc, int ini
 	for (int line = accessor.GetLine(startPos); line <= accessor.GetLine(startPos + lengthDoc); line++) {
 		int levelDelta = 0;
 		//Chars
-		for (int charIndex = accessor.LineStart(line); charIndex <= accessor.LineEnd(line); charIndex++) {
-			char style = accessor.StyleAt(charIndex);
-			if (style != COMMENT && style != COMMENTDOC && style != COMMENTMULTILINE
-				&& !isalnum(accessor.SafeGetCharAt(charIndex - 1)) && accessor.SafeGetCharAt(charIndex - 1) != '_') {
-				for (const char* start : foldStarts) {
-					if (accessor.Match(charIndex, start)) {
-						levelDelta++;
-						break;
-					}
-				}
-				if (levelDelta == 0) {
-					for (const char* end : foldEnds) {
-						if (accessor.Match(charIndex, end)) {
-							levelDelta--;
-							break;
-						}
-					}
+		std::vector<Token> tokens = tokenize(accessor, line);
+		for (Token token : tokens) {
+			if (accessor.StyleAt(token.startPos) != COMMENT && accessor.StyleAt(token.startPos) != COMMENTDOC && accessor.StyleAt(token.startPos) != COMMENTMULTILINE) {
+				if (wordListFoldStart.InList(token.content.c_str())) {
+					levelDelta++;
+				} else if (wordListFoldEnd.InList(token.content.c_str())) {
+					levelDelta--;
 				}
 				if (levelDelta != 0)
 					break;
 			}
 		}
+
 		int level = levelPrev;
 		if (levelDelta == 1) {
 			level |= SC_FOLDLEVELHEADERFLAG;
@@ -152,30 +167,52 @@ void * SCI_METHOD PapyrusLexer::PrivateCall(int operation, void *pointer) {
 	return nullptr;
 }
 
-void PapyrusLexer::styleWordList(StyleContext& styleContext, const WordList& wordList, State state) {
-	if (!isalpha(styleContext.chPrev) && styleContext.chPrev != '_' && isalpha(styleContext.ch)) {
-		for (int i = 0; i < wordList.Length(); i++) {
-			int length = strlen(wordList.WordAt(i));
-			if (styleContext.MatchIgnoreCase(wordList.WordAt(i)) && !isalpha(styleContext.GetRelative(length)) && styleContext.GetRelative(length) != '_') {
-				styleContext.SetState(state);
-				styleContext.Forward(length);
-				styleContext.SetState(DEFAULT);
-				break;
+std::vector<PapyrusLexer::Token> PapyrusLexer::tokenize(Accessor& accessor, int line) {
+	std::vector<Token> tokens;
+	int index = accessor.LineStart(line);
+	while (index < accessor.LineEnd(line)) {
+		int ch = accessor.SafeGetCharAt(index);
+		if (ch == '\r' || ch == '\n') break;
+
+		if (ch == ' ' || ch == '\t') {
+			index++;
+		} else if (isAlphabetic(ch)) {
+			Token token;
+			token.tokenType = IDENTIFIER;
+			token.startPos = index;
+			while (isAlphanumeric(ch)) {
+				token.content.push_back(toLower(ch));
+				index++;
+				ch = accessor.SafeGetCharAt(index);
 			}
+			tokens.push_back(token);
+		} else if (isNumeric(ch)) {
+			Token token;
+			token.tokenType = NUMERIC;
+			token.startPos = index;
+			while (isNumeric(ch) || (tolower(ch) == 'x' && index == token.startPos + 1) || (isHex(ch) && token.content.size() > 2 &&  tolower(token.content.at(1)) == 'x')) {
+				token.content.push_back(toLower(ch));
+				index++;
+				ch = accessor.SafeGetCharAt(index);
+			}
+			tokens.push_back(token);
+		} else {
+			Token token;
+			token.tokenType = SPECIAL;
+			token.startPos = index;
+			token.content.push_back(toLower(ch));
+			tokens.push_back(token);
+			index++;
 		}
 	}
+	return tokens;
 }
 
-bool PapyrusLexer::styleComment(StyleContext & styleContext, const char * start, const char * end, State stateComment, int& stateInit) {
-	if (styleContext.Match(start) || stateInit == stateComment) {
-		stateInit = DEFAULT;
-		styleContext.SetState(stateComment);
-		styleContext.Forward(strlen(start));
-		while (styleContext.More() && !styleContext.Match(end)) {
-			styleContext.Forward();
-		}
-		styleContext.Forward(strlen(end));
-		return true;
+void PapyrusLexer::colorToken(StyleContext & styleContext, Token token, State state) {
+	while (styleContext.currentPos != token.startPos) {
+		styleContext.Forward();
 	}
-	return false;
+
+	styleContext.SetState(state);
+	styleContext.Forward(token.content.size());
 }
