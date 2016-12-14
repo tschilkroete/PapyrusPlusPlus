@@ -67,11 +67,52 @@ int SCI_METHOD PapyrusLexer::WordListSet(int n, const char *wl) {
 void SCI_METHOD PapyrusLexer::Lex(unsigned int startPos, int lengthDoc, int stateInit, IDocument* idocument) {
 	Accessor accessor(idocument, nullptr);
 	StyleContext  styleContext(startPos, lengthDoc, accessor.StyleAt(startPos - 1), accessor);
+
+	//Check if the properties still exist and update the content
+	for (std::list<Property>::iterator iterProperties = propertyLines.begin(); iterProperties != propertyLines.end();) {
+		std::vector<Token> tokens = tokenize(accessor, (*iterProperties).line);
+		bool found = false;
+		for (std::vector<Token>::iterator iterToken = tokens.begin(); iterToken != tokens.end(); iterToken++) {
+			if ((*iterToken).content == "property" && std::next(iterToken) != tokens.end() && !isComment(accessor.StyleAt((*iterToken).startPos)) && !isComment(accessor.StyleAt((*std::next(iterToken)).startPos))) {
+				(*iterProperties).name = (*std::next(iterToken)).content;
+				found = true;
+				break;
+			}
+		}
+		if (found) {
+			iterProperties++;
+		} else {
+			iterProperties = propertyLines.erase(iterProperties);
+		}
+	}
+
 	//This state is saved in the line feed character. It can be used to initialize the state of the next line
 	State messageStateLast = static_cast<State>(accessor.StyleAt(startPos - 1));
 	for (int line = accessor.GetLine(startPos); line <= accessor.GetLine(startPos + lengthDoc - 1); line++) {
 		std::vector<Token> tokens = tokenize(accessor, line);
 		State messageState = messageStateLast;
+
+		//Check if a new property needs to be added
+		for (std::vector<Token>::iterator iterToken = tokens.begin(); iterToken != tokens.end(); iterToken++) {
+			if ((*iterToken).content == "property" && std::next(iterToken) != tokens.end() && !isComment(accessor.StyleAt((*iterToken).startPos)) && !isComment(accessor.StyleAt((*std::next(iterToken)).startPos))) {
+				bool found = false;
+				for (std::list<Property>::iterator iterProperties = propertyLines.begin(); iterProperties != propertyLines.end(); iterProperties++) {
+					if ((*iterProperties).line == line) {
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					Property property;
+					property.line = line;
+					property.name = (*std::next(iterToken)).content;
+					propertyLines.push_back(property);
+					break;
+				}
+			}
+		}
+
+		//Styling
 		for (std::vector<Token>::iterator tokensIter = tokens.begin(); tokensIter != tokens.end(); tokensIter++) {
 			if (messageState == COMMENTDOC) {
 				colorToken(styleContext, *tokensIter, COMMENTDOC);
@@ -110,7 +151,17 @@ void SCI_METHOD PapyrusLexer::Lex(unsigned int startPos, int lengthDoc, int stat
 					} else if (wordListOperators.InList((*tokensIter).content.c_str())) {
 						colorToken(styleContext, *tokensIter, TYPE);
 					} else {
-						colorToken(styleContext, *tokensIter, DEFAULT);
+						bool found = false;
+						for (Property property : propertyLines) {
+							if (property.name == (*tokensIter).content) {
+								colorToken(styleContext, *tokensIter, PROPERTY);
+								found = true;
+								break;
+							}
+						}
+						if (!found) {
+							colorToken(styleContext, *tokensIter, DEFAULT);
+						}
 					}
 				} else if ((*tokensIter).tokenType == SPECIAL) {
 					if (wordListOperators.InList((*tokensIter).content.c_str())) {
@@ -143,7 +194,7 @@ void SCI_METHOD PapyrusLexer::Fold(unsigned int startPos, int lengthDoc, int ini
 		//Chars
 		std::vector<Token> tokens = tokenize(accessor, line);
 		for (Token token : tokens) {
-			if (accessor.StyleAt(token.startPos) != COMMENT && accessor.StyleAt(token.startPos) != COMMENTDOC && accessor.StyleAt(token.startPos) != COMMENTMULTILINE) {
+			if (!isComment(accessor.StyleAt(token.startPos))) {
 				if (wordListFoldStart.InList(token.content.c_str())) {
 					levelDelta++;
 				} else if (wordListFoldEnd.InList(token.content.c_str())) {
@@ -176,11 +227,11 @@ std::vector<PapyrusLexer::Token> PapyrusLexer::tokenize(Accessor& accessor, int 
 
 		if (ch == ' ' || ch == '\t') {
 			index++;
-		} else if (isAlphabetic(ch)) {
+		} else if (isAlphabetic(ch) || ch == '_') {
 			Token token;
 			token.tokenType = IDENTIFIER;
 			token.startPos = index;
-			while (isAlphanumeric(ch)) {
+			while (isAlphanumeric(ch) || ch == '_') {
 				token.content.push_back(toLower(ch));
 				index++;
 				ch = accessor.SafeGetCharAt(index);

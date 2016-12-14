@@ -100,4 +100,5 @@ private:
 			return ch;
 		}
 	}
+	int isComment(int style) { return style == COMMENT || style == COMMENTMULTILINE || style == COMMENTDOC; }
 };
