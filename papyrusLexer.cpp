@@ -124,8 +124,13 @@ void SCI_METHOD PapyrusLexer::Lex(unsigned int startPos, int lengthDoc, int stat
 				if ((*tokensIter).content == ";" && tokensIter != tokens.begin() && (*std::prev(tokensIter)).content == "/") {
 					messageState = DEFAULT;
 				}
-			} else if(messageState == COMMENT){
+			} else if(messageState == COMMENT) {
 				colorToken(styleContext, *tokensIter, COMMENT);
+			} else if(messageState == STRING) {
+				colorToken(styleContext, *tokensIter, STRING);
+				if ((*tokensIter).content == "\"") {
+					messageState = DEFAULT;
+				}
 			} else {
 				//Determine the type of the token and color it
 				if ((*tokensIter).content == "{") {
@@ -139,6 +144,9 @@ void SCI_METHOD PapyrusLexer::Lex(unsigned int startPos, int lengthDoc, int stat
 						colorToken(styleContext, *tokensIter, COMMENT);
 						messageState = COMMENT;
 					}
+				} else if((*tokensIter).content == "\"") {
+					colorToken(styleContext, *tokensIter, STRING);
+					messageState = STRING;
 				} else if ((*tokensIter).tokenType == NUMERIC) {
 					colorToken(styleContext, *tokensIter, NUMBER);
 				} else if ((*tokensIter).tokenType == IDENTIFIER) {
@@ -172,7 +180,7 @@ void SCI_METHOD PapyrusLexer::Lex(unsigned int startPos, int lengthDoc, int stat
 				}
 			}
 		}
-		if (messageState == COMMENT) {
+		if (messageState == COMMENT || messageState == STRING) {
 			messageState = DEFAULT;
 		}
 		if(styleContext.ch == '\r') styleContext.Forward();
