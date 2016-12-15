@@ -117,14 +117,14 @@ void cleanUp() {
 }
 
 LRESULT CALLBACK messageHandleProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam) {
-	static ErrorWindow errorWindow(nppData, instance);
-	errorWindow.clear();
 	switch (message)
 	{
 		case PPPM_COMPILATIONDONE: {
 			::SendMessage(nppData._nppHandle, NPPM_SETSTATUSBAR, STATUSBAR_DOC_TYPE, reinterpret_cast<LPARAM>(L"Compilation successful"));
 			return 0;
 		}case PPPM_COMPILATIONFAILED: {
+			static ErrorWindow errorWindow(nppData, instance);
+			errorWindow.clear();
 			std::wstring output = reinterpret_cast<wchar_t*>(wParam);
 			std::vector<Error> errors;
 			while (!output.empty()) {
