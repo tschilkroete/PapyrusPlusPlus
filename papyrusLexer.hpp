@@ -101,4 +101,16 @@ private:
 		}
 	}
 	int isComment(int style) { return style == COMMENT || style == COMMENTMULTILINE || style == COMMENTDOC; }
+	int getChar(Accessor& accessor, int& index, int& indexNext) {
+		index = indexNext;
+		if (accessor.Encoding() != enc8bit) {
+			int length;
+			int ch = accessor.MultiByteAccess()->GetCharacterAndWidth(index, &length);
+			indexNext = index + length;
+			return ch;
+		} else {
+			indexNext = index + 1;
+			return accessor.SafeGetCharAt(index);
+		}
+	}
 };

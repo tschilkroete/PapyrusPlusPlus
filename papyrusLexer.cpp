@@ -229,20 +229,20 @@ void * SCI_METHOD PapyrusLexer::PrivateCall(int operation, void *pointer) {
 std::vector<PapyrusLexer::Token> PapyrusLexer::tokenize(Accessor& accessor, int line) {
 	std::vector<Token> tokens;
 	int index = accessor.LineStart(line);
+	int indexNext = index;
+	int ch = getChar(accessor, index, indexNext);
 	while (index < accessor.LineEnd(line)) {
-		int ch = accessor.SafeGetCharAt(index);
 		if (ch == '\r' || ch == '\n') break;
 
 		if (ch == ' ' || ch == '\t') {
-			index++;
+			ch = getChar(accessor, index, indexNext);
 		} else if (isAlphabetic(ch) || ch == '_') {
 			Token token;
 			token.tokenType = IDENTIFIER;
 			token.startPos = index;
 			while (isAlphanumeric(ch) || ch == '_') {
 				token.content.push_back(toLower(ch));
-				index++;
-				ch = accessor.SafeGetCharAt(index);
+				ch = getChar(accessor, index, indexNext);
 			}
 			tokens.push_back(token);
 		} else if (isNumeric(ch)) {
@@ -251,8 +251,7 @@ std::vector<PapyrusLexer::Token> PapyrusLexer::tokenize(Accessor& accessor, int 
 			token.startPos = index;
 			while (isNumeric(ch) || (tolower(ch) == 'x' && index == token.startPos + 1) || (isHex(ch) && token.content.size() > 2 &&  tolower(token.content.at(1)) == 'x')) {
 				token.content.push_back(toLower(ch));
-				index++;
-				ch = accessor.SafeGetCharAt(index);
+				ch = getChar(accessor, index, indexNext);
 			}
 			tokens.push_back(token);
 		} else {
@@ -261,7 +260,7 @@ std::vector<PapyrusLexer::Token> PapyrusLexer::tokenize(Accessor& accessor, int 
 			token.startPos = index;
 			token.content.push_back(toLower(ch));
 			tokens.push_back(token);
-			index++;
+			ch = getChar(accessor, index, indexNext);
 		}
 	}
 	return tokens;
