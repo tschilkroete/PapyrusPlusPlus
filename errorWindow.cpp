@@ -26,7 +26,7 @@ ErrorWindow::ErrorWindow(const NppData& nppData, HINSTANCE instance) : DockingDl
 	DockingDlgInterface::init(instance, nppData._nppHandle);
 	tTbData data = {};
 	create(&data);
-	data.dlgID = 0;
+	data.dlgID = -1;
 	data.uMask = DWS_DF_CONT_BOTTOM;
 	data.pszModuleName = L"Papyrus++.dll";
 	data.pszName = L"Papyrus errors";
