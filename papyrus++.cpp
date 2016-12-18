@@ -23,11 +23,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "messages.hpp"
 #include "papyrusLexer.hpp"
 #include "papyrus++.hpp"
+#include "plbridge.hpp"
 #include "settingsWindow.hpp"
 
 #include "scintilla\LexerModule.h"
 
 #include <string>
+#include <sstream>
 
 BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID) {
 	if (reason == DLL_PROCESS_ATTACH) {
@@ -110,6 +112,8 @@ void init() {
 		settings.save();
 
 		settingsWindow();
+	} else {
+		updateBridgeData();
 	}
 }
 
@@ -149,6 +153,15 @@ LRESULT CALLBACK messageHandleProc(HWND window, UINT message, WPARAM wParam, LPA
 	}
 }
 
+void updateBridgeData() {
+	plbridge.includes.clear();
+	std::wstringstream stream(settings.getString(L"importDirectories"));
+	std::wstring path;
+	while (std::getline(stream, path, L';')) {
+		plbridge.includes.push_back(path);
+	}
+}
+
 void compile() {
 	::SendMessage(nppData._nppHandle, NPPM_SETSTATUSBAR, STATUSBAR_DOC_TYPE, reinterpret_cast<LPARAM>(L"Compiling..."));
 	wchar_t inputFile[MAX_PATH];
@@ -160,6 +173,7 @@ void compile() {
 
 void settingsWindow() {
 	SettingsWindow(settings, instance, nppData._nppHandle);
+	updateBridgeData();
 }
 
 void about() {

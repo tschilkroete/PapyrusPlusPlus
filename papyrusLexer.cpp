@@ -19,8 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "PapyrusLexer.hpp"
 
+#include "plbridge.hpp"
 #include "scintilla\Scintilla.h"
 
+#include <codecvt>
 #include <locale>
 #include <vector>
 
@@ -168,7 +170,22 @@ void SCI_METHOD PapyrusLexer::Lex(unsigned int startPos, int lengthDoc, int stat
 							}
 						}
 						if (!found) {
-							colorToken(styleContext, *tokensIter, DEFAULT);
+							for (std::wstring path : plbridge.includes) {
+								path.append(L"\\");
+								path.append(std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>>().from_bytes((*tokensIter).content));
+								path.append(L".psc");
+								FILE* file;
+								if (_wfopen_s(&file, path.c_str(), L"r") == 0) {
+									fclose(file);
+									colorToken(styleContext, *tokensIter, CLASS);
+									found = true;
+									break;
+								}
+							}
+
+							if (!found) {
+								colorToken(styleContext, *tokensIter, DEFAULT);
+							}
 						}
 					}
 				} else if ((*tokensIter).tokenType == SPECIAL) {

@@ -38,6 +38,7 @@ HWND messageHandle;
 void init();
 void cleanUp();
 LRESULT CALLBACK messageHandleProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam);
+void updateBridgeData();
 
 void compile();
 void settingsWindow();
