@@ -182,5 +182,9 @@ void about() {
 	                       "Tschilkroete\r\n"
 	                       "\r\n"
 	                       "This plugin is licenced under the GNU General Public Licence 3 https://www.gnu.org/licenses/gpl.txt \r\n"
-	                       "Get the source code: https://github.com/tschilkroete/PapyrusPlusPlus", L"Papyrus++ " VERSION, MB_OK);
+	                       "Get the source code: https://github.com/tschilkroete/PapyrusPlusPlus \r\n"
+	                       "\r\n"
+	                       "This plugin uses the scintilla library:\r\n"
+	                       "Copyright 1998-2002 by Neil Hodgson <neilh@scintilla.org>\r\n"
+	                       "All Rights Reserved", L"Papyrus++ " VERSION, MB_OK);
 }
