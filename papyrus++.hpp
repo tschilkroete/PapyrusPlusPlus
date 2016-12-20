@@ -28,7 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define VERSION "0.0"
 
 const WCHAR* PLUGIN_NAME = L"Papyrus++";
-const int funcCount = 3;
+const int funcCount = 4;
 FuncItem funcs[funcCount];
 NppData nppData;
 Settings settings;

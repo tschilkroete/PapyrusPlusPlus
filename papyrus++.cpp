@@ -90,9 +90,10 @@ void init() {
 	::RegisterClass(&messageHandleClass);
 	messageHandle = ::CreateWindow(L"MESSAGE_WINDOW", L"", 0, 0, 0, 0, 0, HWND_MESSAGE, nullptr, instance, nullptr);
 
-	funcs[0] = FuncItem{ L"Compile", compile, 0, false, new ShortcutKey{true, false, true, 0x43} };
-	funcs[1] = FuncItem{ L"Settings", settingsWindow, 1, false, nullptr };
-	funcs[2] = FuncItem{ L"About", about, 2, false, nullptr };
+	funcs[0] = FuncItem{ L"Compile", compile, 10, false, new ShortcutKey{true, false, true, 0x43} };
+	//Index 1 was used by the error window in old versions and might still be called on startup!!!
+	funcs[2] = FuncItem{ L"Settings", settingsWindow, 11, false, nullptr };
+	funcs[3] = FuncItem{ L"About", about, 12, false, nullptr };
 
 	wchar_t settingsPath[MAX_PATH];
 	::SendMessage(nppData._nppHandle, NPPM_GETPLUGINSCONFIGDIR, MAX_PATH, (LPARAM)settingsPath);
