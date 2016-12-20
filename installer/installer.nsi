@@ -37,6 +37,6 @@ RequestExecutionLevel admin
 Section ""
 	SetOutPath "$InstDir\plugins"
 	File "bin\Papyrus++.dll"
-	SetOutPath "$APPDATA\Roaming\Notepad++\plugins\config"
+	SetOutPath "$InstDir\plugins\config"
 	File "..\Papyrus++.xml"
 SectionEnd
