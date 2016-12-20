@@ -31,6 +31,7 @@ WindowErrors::WindowErrors(const NppData& nppData, HINSTANCE instance) : Docking
 	data.pszModuleName = L"Papyrus++.dll";
 	data.pszName = L"Papyrus errors";
 	::SendMessage(nppData._nppHandle, NPPM_DMMREGASDCKDLG, 0, reinterpret_cast<LPARAM>(&data));
+	display(false);
 	_hParent = nppData._nppHandle;
 	listView = ::GetDlgItem(getHSelf(), IDC_ERRORLIST);
 	ListView_SetExtendedListViewStyle(listView, LVS_EX_FULLROWSELECT);
