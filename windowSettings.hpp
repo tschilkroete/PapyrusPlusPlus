@@ -23,16 +23,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Windows.h>
 
-#include <thread>
+#include <string>
 
-class CompilationThread
+class WindowSettings
 {
 public:
-	CompilationThread(HWND window, const Settings& settings);
-	void start(std::wstring inputFile);
+	WindowSettings(Settings& settings, HINSTANCE instance,HWND parent);
 private:
-	static void run(CompilationThread& compilationThread, std::wstring inputFile);
-	std::thread compilationThread;
-	HWND window;
-	const Settings& settings;
+	void save();
+	std::wstring getText(HWND edit);
+	static LRESULT CALLBACK windowProcedure(HWND window, UINT message, WPARAM wParam, LPARAM lParam);
+	Settings& settings;
+	HWND compilerPath;
+	HWND importDirectories;
+	HWND outputDirectory;
+	HWND flagFile;
+	HWND additionalArguments;
 };

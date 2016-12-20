@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 const wchar_t* SETTINGS_CLASS_NAME = L"Papyrus++ settings";
 
-SettingsWindow::SettingsWindow(Settings& settings, HINSTANCE instance, HWND parent) : settings(settings) {
+WindowSettings::WindowSettings(Settings& settings, HINSTANCE instance, HWND parent) : settings(settings) {
 	WNDCLASS windowClass = {};
 	windowClass.hInstance = instance;
 	windowClass.lpfnWndProc = windowProcedure;
@@ -46,7 +46,7 @@ SettingsWindow::SettingsWindow(Settings& settings, HINSTANCE instance, HWND pare
 	}
 }
 
-void SettingsWindow::save() {
+void WindowSettings::save() {
 	settings.putString(L"compilerPath", getText(compilerPath));
 	settings.putString(L"importDirectories", getText(importDirectories));
 	settings.putString(L"outputDirectory", getText(outputDirectory));
@@ -55,7 +55,7 @@ void SettingsWindow::save() {
 	settings.save();
 }
 
-std::wstring SettingsWindow::getText(HWND edit) {
+std::wstring WindowSettings::getText(HWND edit) {
 	int length = ::SendMessage(edit, EM_LINELENGTH, 0, 0);
 	std::vector<wchar_t> content(length > 1 ? length : 1);
 	content[0] = length;
@@ -63,10 +63,10 @@ std::wstring SettingsWindow::getText(HWND edit) {
 	return std::wstring(&content[0], length);
 }
 
-LRESULT SettingsWindow::windowProcedure(HWND window, UINT message, WPARAM wParam, LPARAM lParam) {
+LRESULT WindowSettings::windowProcedure(HWND window, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message) {
 	case WM_CLOSE: {
-		((SettingsWindow*)::GetWindowLong(window, GWLP_USERDATA))->save();
+		((WindowSettings*)::GetWindowLong(window, GWLP_USERDATA))->save();
 
 		DestroyWindow(window);
 		return 0;

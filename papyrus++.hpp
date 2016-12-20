@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include "compilationThread.hpp"
+#include "threadCompilation.hpp"
 #include "settings.hpp"
 
 #include "npp\PluginInterface.h"

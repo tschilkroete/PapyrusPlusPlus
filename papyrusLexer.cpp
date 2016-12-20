@@ -115,56 +115,56 @@ void SCI_METHOD PapyrusLexer::Lex(unsigned int startPos, int lengthDoc, int stat
 		}
 
 		//Styling
-		for (std::vector<Token>::iterator tokensIter = tokens.begin(); tokensIter != tokens.end(); tokensIter++) {
+		for (std::vector<Token>::iterator iterTokens = tokens.begin(); iterTokens != tokens.end(); iterTokens++) {
 			if (messageState == COMMENTDOC) {
-				colorToken(styleContext, *tokensIter, COMMENTDOC);
-				if ((*tokensIter).content == "}") {
+				colorToken(styleContext, *iterTokens, COMMENTDOC);
+				if ((*iterTokens).content == "}") {
 					messageState = DEFAULT;
 				}
 			} else if(messageState == COMMENTMULTILINE) {
-				colorToken(styleContext, *tokensIter, COMMENTMULTILINE);
-				if ((*tokensIter).content == ";" && tokensIter != tokens.begin() && (*std::prev(tokensIter)).content == "/") {
+				colorToken(styleContext, *iterTokens, COMMENTMULTILINE);
+				if ((*iterTokens).content == ";" && iterTokens != tokens.begin() && (*std::prev(iterTokens)).content == "/") {
 					messageState = DEFAULT;
 				}
 			} else if(messageState == COMMENT) {
-				colorToken(styleContext, *tokensIter, COMMENT);
+				colorToken(styleContext, *iterTokens, COMMENT);
 			} else if(messageState == STRING) {
-				colorToken(styleContext, *tokensIter, STRING);
-				if ((*tokensIter).content == "\"") {
+				colorToken(styleContext, *iterTokens, STRING);
+				if ((*iterTokens).content == "\"") {
 					messageState = DEFAULT;
 				}
 			} else {
 				//Determine the type of the token and color it
-				if ((*tokensIter).content == "{") {
-					colorToken(styleContext, *tokensIter, COMMENTDOC);
+				if ((*iterTokens).content == "{") {
+					colorToken(styleContext, *iterTokens, COMMENTDOC);
 					messageState = COMMENTDOC;
-				} else if ((*tokensIter).content == ";") {
-					if (std::next(tokensIter) != tokens.end() && (*std::next(tokensIter)).content == "/") {
-						colorToken(styleContext, *tokensIter, COMMENTMULTILINE);
+				} else if ((*iterTokens).content == ";") {
+					if (std::next(iterTokens) != tokens.end() && (*std::next(iterTokens)).content == "/") {
+						colorToken(styleContext, *iterTokens, COMMENTMULTILINE);
 						messageState = COMMENTMULTILINE;
 					} else {
-						colorToken(styleContext, *tokensIter, COMMENT);
+						colorToken(styleContext, *iterTokens, COMMENT);
 						messageState = COMMENT;
 					}
-				} else if((*tokensIter).content == "\"") {
-					colorToken(styleContext, *tokensIter, STRING);
+				} else if((*iterTokens).content == "\"") {
+					colorToken(styleContext, *iterTokens, STRING);
 					messageState = STRING;
-				} else if ((*tokensIter).tokenType == NUMERIC) {
-					colorToken(styleContext, *tokensIter, NUMBER);
-				} else if ((*tokensIter).tokenType == IDENTIFIER) {
-					if (wordListTypes.InList((*tokensIter).content.c_str())) {
-						colorToken(styleContext, *tokensIter, TYPE);
-					} else if (wordListFlowControl.InList((*tokensIter).content.c_str())) {
-						colorToken(styleContext, *tokensIter, FLOWCONTROL);
-					} else if (wordListKeywords.InList((*tokensIter).content.c_str())) {
-						colorToken(styleContext, *tokensIter, KEYWORD);
-					} else if (wordListOperators.InList((*tokensIter).content.c_str())) {
-						colorToken(styleContext, *tokensIter, TYPE);
+				} else if ((*iterTokens).tokenType == NUMERIC) {
+					colorToken(styleContext, *iterTokens, NUMBER);
+				} else if ((*iterTokens).tokenType == IDENTIFIER) {
+					if (wordListTypes.InList((*iterTokens).content.c_str())) {
+						colorToken(styleContext, *iterTokens, TYPE);
+					} else if (wordListFlowControl.InList((*iterTokens).content.c_str())) {
+						colorToken(styleContext, *iterTokens, FLOWCONTROL);
+					} else if (wordListKeywords.InList((*iterTokens).content.c_str())) {
+						colorToken(styleContext, *iterTokens, KEYWORD);
+					} else if (wordListOperators.InList((*iterTokens).content.c_str())) {
+						colorToken(styleContext, *iterTokens, TYPE);
 					} else {
 						bool found = false;
 						for (Property property : propertyLines) {
-							if (property.name == (*tokensIter).content) {
-								colorToken(styleContext, *tokensIter, PROPERTY);
+							if (property.name == (*iterTokens).content) {
+								colorToken(styleContext, *iterTokens, PROPERTY);
 								found = true;
 								break;
 							}
@@ -172,27 +172,27 @@ void SCI_METHOD PapyrusLexer::Lex(unsigned int startPos, int lengthDoc, int stat
 						if (!found) {
 							for (std::wstring path : plbridge.includes) {
 								path.append(L"\\");
-								path.append(std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>>().from_bytes((*tokensIter).content));
+								path.append(std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>>().from_bytes((*iterTokens).content));
 								path.append(L".psc");
 								FILE* file;
 								if (_wfopen_s(&file, path.c_str(), L"r") == 0) {
 									fclose(file);
-									colorToken(styleContext, *tokensIter, CLASS);
+									colorToken(styleContext, *iterTokens, CLASS);
 									found = true;
 									break;
 								}
 							}
 
 							if (!found) {
-								colorToken(styleContext, *tokensIter, DEFAULT);
+								colorToken(styleContext, *iterTokens, DEFAULT);
 							}
 						}
 					}
-				} else if ((*tokensIter).tokenType == SPECIAL) {
-					if (wordListOperators.InList((*tokensIter).content.c_str())) {
-						colorToken(styleContext, *tokensIter, OPERATOR);
+				} else if ((*iterTokens).tokenType == SPECIAL) {
+					if (wordListOperators.InList((*iterTokens).content.c_str())) {
+						colorToken(styleContext, *iterTokens, OPERATOR);
 					} else {
-						colorToken(styleContext, *tokensIter, DEFAULT);
+						colorToken(styleContext, *iterTokens, DEFAULT);
 					}
 				}
 			}

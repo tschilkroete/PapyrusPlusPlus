@@ -17,12 +17,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "errorWindow.hpp"
+#include "windowErrors.hpp"
 
 #include <Commctrl.h>
 #include "npp\Notepad_plus_msgs.h"
 
-ErrorWindow::ErrorWindow(const NppData& nppData, HINSTANCE instance) : DockingDlgInterface(IDD_WINDOWERROR), nppData(nppData) {
+WindowErrors::WindowErrors(const NppData& nppData, HINSTANCE instance) : DockingDlgInterface(IDD_WINDOWERROR), nppData(nppData) {
 	DockingDlgInterface::init(instance, nppData._nppHandle);
 	tTbData data = {};
 	create(&data);
@@ -48,7 +48,7 @@ ErrorWindow::ErrorWindow(const NppData& nppData, HINSTANCE instance) : DockingDl
 	resize();
 }
 
-void ErrorWindow::show(std::vector<Error> errors) {
+void WindowErrors::show(std::vector<Error> errors) {
 	for (unsigned int i = 0; i < errors.size(); i++) {
 		LVITEM item = {};
 		item.mask = LVIF_TEXT;
@@ -67,7 +67,7 @@ void ErrorWindow::show(std::vector<Error> errors) {
 	DockingDlgInterface::display();
 }
 
-BOOL CALLBACK ErrorWindow::run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam) {
+BOOL CALLBACK WindowErrors::run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message) {
 	case WM_SIZE: {
 		resize();
@@ -87,13 +87,13 @@ BOOL CALLBACK ErrorWindow::run_dlgProc(UINT message, WPARAM wParam, LPARAM lPara
 	}
 }
 
-void ErrorWindow::resize() {
+void WindowErrors::resize() {
 	RECT windowSize;
 	::GetClientRect(getHSelf(), &windowSize);
 	::SetWindowPos(listView, HWND_TOP, 2, 2, windowSize.right - windowSize.left - 4, windowSize.bottom - windowSize.top - 2, 0);
 	ListView_SetColumnWidth(listView, 0, windowSize.right - windowSize.left - 98);
 }
 
-void ErrorWindow::clear() {
+void WindowErrors::clear() {
 	ListView_DeleteAllItems(listView);
 }

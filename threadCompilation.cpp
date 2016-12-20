@@ -17,21 +17,21 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "compilationThread.hpp"
+#include "threadCompilation.hpp"
 #include "messages.hpp"
 
 #include <fstream>
 #include <string>
 
-CompilationThread::CompilationThread(HWND window, const Settings& settings) : window(window), settings(settings) {
+ThreadCompilation::ThreadCompilation(HWND window, const Settings& settings) : window(window), settings(settings) {
 }
 
-void CompilationThread::start(std::wstring inputFile) {
+void ThreadCompilation::start(std::wstring inputFile) {
 	if (!compilationThread.joinable())
 		compilationThread = std::thread(run, std::ref(*this), inputFile);
 }
 
-void CompilationThread::run(CompilationThread& compilationThread, std::wstring inputFile) {
+void ThreadCompilation::run(ThreadCompilation& compilationThread, std::wstring inputFile) {
 	const Settings& settings = compilationThread.settings;
 	std::wstring path = settings.getString(L"compilerPath");
 	if (std::ifstream(path).good()) {

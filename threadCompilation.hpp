@@ -17,30 +17,22 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "resources.hpp"
+#pragma once
 
-#include "npp\DockingDlgInterface.h"
-#include "npp\PluginInterface.h"
-#include <windows.h>
+#include "settings.hpp"
 
-#include <string>
-#include <vector>
+#include <Windows.h>
 
-struct Error {
-	std::wstring message;
-	int line;
-	int column;
-};
+#include <thread>
 
-class ErrorWindow : public DockingDlgInterface
+class ThreadCompilation
 {
 public:
-	ErrorWindow(const NppData& nppData, HINSTANCE instance);
-	void show(std::vector<Error> errors);
-	void clear();
-protected:
-	virtual BOOL CALLBACK run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam);
-	void resize();
-	HWND listView;
-	const NppData& nppData;
+	ThreadCompilation(HWND window, const Settings& settings);
+	void start(std::wstring inputFile);
+private:
+	static void run(ThreadCompilation& compilationThread, std::wstring inputFile);
+	std::thread compilationThread;
+	HWND window;
+	const Settings& settings;
 };

@@ -19,12 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include "errorWindow.hpp"
+#include "windowErrors.hpp"
 #include "messages.hpp"
 #include "papyrusLexer.hpp"
 #include "papyrus++.hpp"
 #include "plbridge.hpp"
-#include "settingsWindow.hpp"
+#include "windowSettings.hpp"
 
 #include "scintilla\LexerModule.h"
 
@@ -127,8 +127,8 @@ LRESULT CALLBACK messageHandleProc(HWND window, UINT message, WPARAM wParam, LPA
 			::SendMessage(nppData._nppHandle, NPPM_SETSTATUSBAR, STATUSBAR_DOC_TYPE, reinterpret_cast<LPARAM>(L"Compilation successful"));
 			return 0;
 		}case PPPM_COMPILATIONFAILED: {
-			static ErrorWindow errorWindow(nppData, instance);
-			errorWindow.clear();
+			static WindowErrors windowErrors(nppData, instance);
+			windowErrors.clear();
 			std::wstring output = reinterpret_cast<wchar_t*>(wParam);
 			std::vector<Error> errors;
 			while (!output.empty()) {
@@ -137,12 +137,12 @@ LRESULT CALLBACK messageHandleProc(HWND window, UINT message, WPARAM wParam, LPA
 				Error error;
 				int bracketStartIndex = line.find_first_of(L'(');
 				error.line = std::stoi(line.substr(bracketStartIndex + 1, line.find_first_of(L',') - (bracketStartIndex + 1)));
-				int commaIndex = line.find_first_of(L',');
-				error.column = std::stoi(line.substr(commaIndex + 1, line.find_first_of(L')') - (commaIndex - 1)));
+				int indexComma = line.find_first_of(L',');
+				error.column = std::stoi(line.substr(indexComma + 1, line.find_first_of(L')') - (indexComma - 1)));
 				error.message = line.substr(line.find_first_of(L')') + 3);
 				errors.push_back(error);
 			}
-			errorWindow.show(errors);
+			windowErrors.show(errors);
 			::SendMessage(nppData._nppHandle, NPPM_SETSTATUSBAR, STATUSBAR_DOC_TYPE, reinterpret_cast<LPARAM>(L"Compilation failed"));
 			return 0;
 		}case PPPM_COMPILERNOTFOUND: {
@@ -164,15 +164,15 @@ void updateBridgeData() {
 
 void compile() {
 	::SendMessage(nppData._nppHandle, NPPM_SETSTATUSBAR, STATUSBAR_DOC_TYPE, reinterpret_cast<LPARAM>(L"Compiling..."));
-	wchar_t inputFile[MAX_PATH];
-	::SendMessage(nppData._nppHandle, NPPM_GETFULLCURRENTPATH, MAX_PATH, (LPARAM)inputFile);
+	wchar_t fileInput[MAX_PATH];
+	::SendMessage(nppData._nppHandle, NPPM_GETFULLCURRENTPATH, MAX_PATH, (LPARAM)fileInput);
 
-	static CompilationThread compilationThread(messageHandle, settings);
-	compilationThread.start(std::wstring(inputFile));
+	static ThreadCompilation threadCompilation(messageHandle, settings);
+	threadCompilation.start(std::wstring(fileInput));
 }
 
 void settingsWindow() {
-	SettingsWindow(settings, instance, nppData._nppHandle);
+	WindowSettings(settings, instance, nppData._nppHandle);
 	updateBridgeData();
 }
 
