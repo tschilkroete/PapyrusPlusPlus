@@ -129,15 +129,17 @@ LRESULT CALLBACK messageHandleProc(HWND window, UINT message, WPARAM wParam, LPA
 		}case PPPM_COMPILATIONFAILED: {
 			static WindowErrors windowErrors(nppData, instance);
 			windowErrors.clear();
-			std::wstring output = reinterpret_cast<wchar_t*>(wParam);
+			wchar_t pathFileA[MAX_PATH];
+			::SendMessage(nppData._nppHandle, NPPM_GETFULLCURRENTPATH, MAX_PATH, reinterpret_cast<LPARAM>(pathFileA));
+			std::wstring pathFile(pathFileA);
+			std::wstringstream output(std::wstring(reinterpret_cast<wchar_t*>(wParam)));
 			std::vector<Error> errors;
-			while (!output.empty()) {
-				std::wstring line = output.substr(0, output.find_first_of(L"\r\n"));
-				output.erase(0, line.size() + 2);
+			std::wstring line;
+			while (std::getline(output, line)) {
+				line.erase(0, pathFile.size() + 1);
 				Error error;
-				int bracketStartIndex = line.find_first_of(L'(');
-				error.line = std::stoi(line.substr(bracketStartIndex + 1, line.find_first_of(L',') - (bracketStartIndex + 1)));
 				int indexComma = line.find_first_of(L',');
+				error.line = std::stoi(line.substr(0, indexComma));
 				error.column = std::stoi(line.substr(indexComma + 1, line.find_first_of(L')') - (indexComma - 1)));
 				error.message = line.substr(line.find_first_of(L')') + 3);
 				errors.push_back(error);
