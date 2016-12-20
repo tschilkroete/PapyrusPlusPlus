@@ -219,7 +219,7 @@ void SCI_METHOD PapyrusLexer::Fold(unsigned int startPos, int lengthDoc, int ini
 		//Chars
 		std::vector<Token> tokens = tokenize(accessor, line);
 		for (Token token : tokens) {
-			if (!isComment(accessor.StyleAt(token.startPos))) {
+			if (!isComment(accessor.StyleAt(token.startPos)) && accessor.StyleAt(token.startPos) != STRING) {
 				if (wordListFoldStart.InList(token.content.c_str())) {
 					levelDelta++;
 				} else if (wordListFoldEnd.InList(token.content.c_str())) {
