@@ -1,5 +1,10 @@
 Debug/
 Release/
-installer/bin
+PapyrusPlusPlus/Debug/
+PapyrusPlusPlus/Release/
+PapyrusPlusPlus/installer/bin
 
-*.vcxproj*
+.vs/
+*.vcxproj.user
+*.VC.VC.opendb
+*.VC.db
