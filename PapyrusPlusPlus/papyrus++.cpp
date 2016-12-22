@@ -138,7 +138,11 @@ LRESULT CALLBACK messageHandleProc(HWND window, UINT message, WPARAM wParam, LPA
 			std::vector<Error> errors;
 			std::wstring line;
 			while (std::getline(output, line)) {
-				line.erase(0, pathFile.size() + 1);
+				if (line.compare(0, 9, L"<unknown>") == 0) {
+					line.erase(0, 10);
+				} else {
+					line.erase(0, pathFile.size() + 1);
+				}
 				Error error;
 				int indexComma = line.find_first_of(L',');
 				error.line = std::stoi(line.substr(0, indexComma));
