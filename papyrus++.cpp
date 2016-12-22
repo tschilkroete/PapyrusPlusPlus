@@ -168,6 +168,7 @@ void updateBridgeData() {
 
 void compile() {
 	::SendMessage(nppData._nppHandle, NPPM_SETSTATUSBAR, STATUSBAR_DOC_TYPE, reinterpret_cast<LPARAM>(L"Compiling..."));
+	::SendMessage(nppData._nppHandle, NPPM_SAVECURRENTFILE, 0, 0);
 	wchar_t fileInput[MAX_PATH];
 	::SendMessage(nppData._nppHandle, NPPM_GETFULLCURRENTPATH, MAX_PATH, (LPARAM)fileInput);
 
