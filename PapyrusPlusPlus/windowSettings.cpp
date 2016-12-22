@@ -69,6 +69,7 @@ std::wstring WindowSettings::getText(HWND edit) {
 	int length = ::GetWindowTextLength(edit);
 	std::wstring content(length + 1, L' ');
 	::GetWindowText(edit, &content[0], content.size());
+	content.pop_back();//Remove \0
 	return content;
 }
 
