@@ -30,13 +30,18 @@ WindowSettings::WindowSettings(Settings& settings, HINSTANCE instance, HWND pare
 	windowClass.lpszClassName = SETTINGS_CLASS_NAME;
 	::RegisterClass(&windowClass);
 
-	HWND window = ::CreateWindow(SETTINGS_CLASS_NAME, SETTINGS_CLASS_NAME, WS_OVERLAPPED | WS_SYSMENU, CW_USEDEFAULT, CW_USEDEFAULT, 755, 190, parent, nullptr, instance, nullptr);
+	HWND window = ::CreateWindow(SETTINGS_CLASS_NAME, SETTINGS_CLASS_NAME, WS_OVERLAPPED | WS_SYSMENU, CW_USEDEFAULT, CW_USEDEFAULT, 855, 250, parent, nullptr, instance, nullptr);
 	::SetWindowLong(window, GWLP_USERDATA, (LONG)this);
-	compilerPath = ::CreateWindow(L"EDIT", settings.getString(L"compilerPath").c_str(), WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL, 160, 10, 580, 20, window, nullptr, instance, nullptr);
-	importDirectories = ::CreateWindow(L"EDIT", settings.getString(L"importDirectories").c_str(), WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL, 160, 40, 580, 20, window, nullptr, instance, nullptr);
-	outputDirectory = ::CreateWindow(L"EDIT", settings.getString(L"outputDirectory").c_str(), WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL, 160, 70, 580, 20, window, nullptr, instance, nullptr);
-	flagFile = ::CreateWindow(L"EDIT", settings.getString(L"flagFile").c_str(), WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL, 160, 100, 580, 20, window, nullptr, instance, nullptr);
-	additionalArguments = ::CreateWindow(L"EDIT", settings.getString(L"additionalArguments").c_str(), WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL, 160, 130, 580, 20, window, nullptr, instance, nullptr);
+	compilerPath =        ::CreateWindow(L"EDIT", settings.getString(L"compilerPath").c_str(), WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,                                      160, 10, 680, 20, window, nullptr, instance, nullptr);
+	std::wstring imports = settings.getString(L"importDirectories");
+	unsigned int index = 0;
+	while ((index = imports.find(L";", index)) != std::wstring::npos) {
+		imports.replace(index, 1, L"\r\n");
+	}
+	importDirectories =   ::CreateWindow(L"EDIT", imports.c_str(), WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ES_AUTOVSCROLL | ES_MULTILINE,                                  160, 40, 680, 80, window, nullptr, instance, nullptr);
+	outputDirectory =     ::CreateWindow(L"EDIT", settings.getString(L"outputDirectory").c_str(), WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,                                   160, 130, 680, 20, window, nullptr, instance, nullptr);
+	flagFile =            ::CreateWindow(L"EDIT", settings.getString(L"flagFile").c_str(), WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,                                          160, 160, 680, 20, window, nullptr, instance, nullptr);
+	additionalArguments = ::CreateWindow(L"EDIT", settings.getString(L"additionalArguments").c_str(), WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,                               160, 190, 680, 20, window, nullptr, instance, nullptr);
 	::ShowWindow(window, SW_SHOWNORMAL);
 
 	MSG msg;
@@ -48,7 +53,12 @@ WindowSettings::WindowSettings(Settings& settings, HINSTANCE instance, HWND pare
 
 void WindowSettings::save() {
 	settings.putString(L"compilerPath", getText(compilerPath));
-	settings.putString(L"importDirectories", getText(importDirectories));
+	std::wstring imports = getText(importDirectories);
+	unsigned int index = 0;
+	while ((index = imports.find(L"\r\n", index)) != std::wstring::npos) {
+		imports.replace(index, 2, L";");
+	}
+	settings.putString(L"importDirectories", imports);
 	settings.putString(L"outputDirectory", getText(outputDirectory));
 	settings.putString(L"flagFile", getText(flagFile));
 	settings.putString(L"additionalArguments", getText(additionalArguments));
@@ -56,11 +66,10 @@ void WindowSettings::save() {
 }
 
 std::wstring WindowSettings::getText(HWND edit) {
-	int length = ::SendMessage(edit, EM_LINELENGTH, 0, 0);
-	std::vector<wchar_t> content(length > 1 ? length : 1);
-	content[0] = length;
-	::SendMessage(edit, EM_GETLINE, 0, (LPARAM)&content[0]);
-	return std::wstring(&content[0], length);
+	int length = ::GetWindowTextLength(edit);
+	std::wstring content(length + 1, L' ');
+	::GetWindowText(edit, &content[0], content.size());
+	return content;
 }
 
 LRESULT WindowSettings::windowProcedure(HWND window, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -76,9 +85,10 @@ LRESULT WindowSettings::windowProcedure(HWND window, UINT message, WPARAM wParam
 
 		::TextOut(hdc, 10, 12, L"Compiler path:", 14);
 		::TextOut(hdc, 10, 42, L"Import directories:", 19);
-		::TextOut(hdc, 10, 72, L"Output directory:", 17);
-		::TextOut(hdc, 10, 102, L"Flag file:", 10);
-		::TextOut(hdc, 10, 132, L"Additional arguments:", 21);
+		::TextOut(hdc, 20, 60, L"(One per line)", 14);
+		::TextOut(hdc, 10, 132, L"Output directory:", 17);
+		::TextOut(hdc, 10, 162, L"Flag file:", 10);
+		::TextOut(hdc, 10, 192, L"Additional arguments:", 21);
 
 		::EndPaint(window, &paintstruct);
 		return 0;
