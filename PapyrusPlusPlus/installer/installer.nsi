@@ -19,8 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 !include "MUI2.nsh"
 
-Name "Papyrus++"
-OutFile "bin\Papyrus++_2.0.0_Installer.exe"
+Name "Papyrus++ 2.1"
+OutFile "bin\Papyrus++_2.1.0_Installer.exe"
 InstallDirRegKey HKLM "SOFTWARE\Notepad++" ""
 
 RequestExecutionLevel admin
