@@ -44,21 +44,39 @@ void ThreadCompilation::run(ThreadCompilation& compilationThread, std::wstring i
 		HANDLE errorReadHandle;
 		SECURITY_ATTRIBUTES attr = {};
 		attr.bInheritHandle = TRUE;
-		::CreatePipe(&errorReadHandle, &startupInfo.hStdError, &attr, 65536);
-		PROCESS_INFORMATION compilationProcess = {};
-		::CreateProcess(nullptr, &commandLine[0], nullptr, nullptr, TRUE, CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT, nullptr, nullptr, &startupInfo, &compilationProcess);
-		::WaitForSingleObject(compilationProcess.hProcess, INFINITE);
-
-		DWORD size;
-		::PeekNamedPipe(errorReadHandle, nullptr, 0, nullptr, &size, nullptr);
-		if (size > 0) {
-			std::vector<char> data(size);
-			::ReadFile(errorReadHandle, &data[0], size, nullptr, nullptr);
-
-			std::wstring errorOutput(data.begin(), data.end());
-			::SendMessage(compilationThread.window, PPPM_COMPILATIONFAILED, reinterpret_cast<WPARAM>(&errorOutput[0]), 0);
+		if (::CreatePipe(&errorReadHandle, &startupInfo.hStdError, &attr, 65536)) {
+			PROCESS_INFORMATION compilationProcess = {};
+			if (::CreateProcess(nullptr, &commandLine[0], nullptr, nullptr, TRUE, CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT, nullptr, nullptr, &startupInfo, &compilationProcess)) {
+				if (::WaitForSingleObject(compilationProcess.hProcess, INFINITE) != WAIT_FAILED) {
+					DWORD size;
+					if (::PeekNamedPipe(errorReadHandle, nullptr, 0, nullptr, &size, nullptr)){
+						if (size > 0) {
+							std::vector<char> data(size);
+							if (::ReadFile(errorReadHandle, &data[0], size, nullptr, nullptr)) {
+								std::wstring errorOutput(data.begin(), data.end());
+								::SendMessage(compilationThread.window, PPPM_COMPILATIONFAILED, reinterpret_cast<WPARAM>(&errorOutput[0]), 0);
+							} else {
+								::MessageBox(compilationThread.window, std::to_wstring(::GetLastError()).c_str(), L"ReadFile failed. Compilation stopped.", MB_OK);
+								return;
+							}
+						} else {
+							::SendMessage(compilationThread.window, PPPM_COMPILATIONDONE, 0, 0);
+						}
+					} else {
+						::MessageBox(compilationThread.window, std::to_wstring(::GetLastError()).c_str(), L"PeekNamedPipe failed. Compilation stopped.", MB_OK);
+						return;
+					}
+				} else {
+					::MessageBox(compilationThread.window, std::to_wstring(::GetLastError()).c_str(), L"WaitForSingleObject failed. Compilation stopped.", MB_OK);
+					return;
+				}
+			} else {
+				::MessageBox(compilationThread.window, std::to_wstring(::GetLastError()).c_str(), L"CreateProcess failed. Compilation stopped.", MB_OK);
+				return;
+			}
 		} else {
-			::SendMessage(compilationThread.window, PPPM_COMPILATIONDONE, 0, 0);
+			::MessageBox(compilationThread.window, std::to_wstring(::GetLastError()).c_str(), L"CreatePipe failed. Compilation stopped.", MB_OK);
+			return;
 		}
 	} else {
 		::SendMessage(compilationThread.window, PPPM_COMPILERNOTFOUND, 0, 0);
