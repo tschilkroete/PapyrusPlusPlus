@@ -141,22 +141,29 @@ LRESULT CALLBACK messageHandleProc(HWND window, UINT message, WPARAM wParam, LPA
 			windowErrors.clear();
 			wchar_t pathFileA[MAX_PATH];
 			::SendMessage(nppData._nppHandle, NPPM_GETFULLCURRENTPATH, MAX_PATH, reinterpret_cast<LPARAM>(pathFileA));
-			std::wstring pathFile(pathFileA);
 			std::wstringstream output(std::wstring(reinterpret_cast<wchar_t*>(wParam)));
 			std::vector<Error> errors;
 			std::wstring line;
 			while (std::getline(output, line)) {
-				if (line.compare(0, 9, L"<unknown>") == 0) {
-					line.erase(0, 10);
-				} else {
-					line.erase(0, pathFile.size() + 1);
+				try {
+					std::wstring lineError = line;
+					Error error;
+					if (lineError.compare(0, 9, L"<unknown>") == 0) {
+						error.file = L"<unknown>";
+						lineError.erase(0, 10);
+					} else {
+						error.file = lineError.substr(0, lineError.find(L".psc(") + 4);
+						lineError.erase(0, lineError.find(L".psc(") + 5);
+					}
+					size_t indexComma = lineError.find_first_of(L',');
+					error.line = std::stoi(lineError.substr(0, indexComma));
+					error.column = std::stoi(lineError.substr(indexComma + 1, lineError.find_first_of(L')') - (indexComma - 1)));
+					error.message = lineError.substr(lineError.find_first_of(L')') + 3);
+					errors.push_back(error);
 				}
-				Error error;
-				size_t indexComma = line.find_first_of(L',');
-				error.line = std::stoi(line.substr(0, indexComma));
-				error.column = std::stoi(line.substr(indexComma + 1, line.find_first_of(L')') - (indexComma - 1)));
-				error.message = line.substr(line.find_first_of(L')') + 3);
-				errors.push_back(error);
+				catch (...) {
+					::MessageBox(nullptr, line.c_str(), L"Couldn't parse error:", MB_OK);
+				}
 			}
 			windowErrors.show(errors);
 			::SendMessage(nppData._nppHandle, NPPM_SETSTATUSBAR, STATUSBAR_DOC_TYPE, reinterpret_cast<LPARAM>(L"Compilation failed"));

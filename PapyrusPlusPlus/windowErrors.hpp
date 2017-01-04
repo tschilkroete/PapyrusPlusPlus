@@ -27,6 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 
 struct Error {
+	std::wstring file;
 	std::wstring message;
 	int line;
 	int column;
@@ -40,7 +41,9 @@ public:
 	void clear();
 protected:
 	virtual INT_PTR CALLBACK run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam);
+private:
 	void resize();
 	HWND listView;
 	const NppData& nppData;
+	std::vector<Error> errors;
 };

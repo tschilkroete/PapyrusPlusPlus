@@ -37,30 +37,38 @@ WindowErrors::WindowErrors(const NppData& nppData, HINSTANCE instance) : Docking
 	ListView_SetExtendedListViewStyle(listView, LVS_EX_FULLROWSELECT);
 	LVCOLUMN column = {};
 	column.mask = LVCF_WIDTH | LVCF_TEXT;
+	column.cx = 180;
+	column.pszText = L"File";
+	ListView_InsertColumn(listView, 0, &column);
 	column.cx = 100;
 	column.pszText = L"Message";
-	ListView_InsertColumn(listView, 0, &column);
-	column.cx = 45;
-	column.pszText = L"Ln";
 	ListView_InsertColumn(listView, 1, &column);
 	column.cx = 45;
-	column.pszText = L"Col";
+	column.pszText = L"Ln";
 	ListView_InsertColumn(listView, 2, &column);
+	column.cx = 45;
+	column.pszText = L"Col";
+	ListView_InsertColumn(listView, 3, &column);
 	resize();
 }
 
 void WindowErrors::show(std::vector<Error> errors) {
+	this->errors = errors;
 	for (unsigned int i = 0; i < errors.size(); i++) {
 		LVITEM item = {};
 		item.mask = LVIF_TEXT;
-		item.iItem = 0;
-		item.pszText = &errors[i].message[0];
+		item.iItem = i;
+		std::wstring fileShort = errors[i].file.substr(errors[i].file.find_last_of(L"/\\") + 1);
+		item.pszText = &fileShort[0];
 		ListView_InsertItem(listView, &item);
 		item.iSubItem = 1;
+		item.pszText = &errors[i].message[0];
+		ListView_SetItem(listView, &item);
+		item.iSubItem = 2;
 		std::wstring line = std::to_wstring(errors[i].line);
 		item.pszText = &line[0];
 		ListView_SetItem(listView, &item);
-		item.iSubItem = 2;
+		item.iSubItem = 3;
 		std::wstring column = std::to_wstring(errors[i].column);
 		item.pszText = &column[0];
 		ListView_SetItem(listView, &item);
@@ -76,11 +84,14 @@ INT_PTR CALLBACK WindowErrors::run_dlgProc(UINT message, WPARAM wParam, LPARAM l
 	} case WM_NOTIFY:{
 		NMITEMACTIVATE* item = (NMITEMACTIVATE*)lParam;
 		if (item->hdr.hwndFrom == listView && item->hdr.code == NM_DBLCLK) {
-			int scintilla;
-			::SendMessage(nppData._nppHandle, NPPM_GETCURRENTSCINTILLA, 0, reinterpret_cast<LPARAM>(&scintilla));
-			wchar_t line[8];
-			ListView_GetItemText(listView, item->iItem, 1, line, 8);
-			::SendMessage(scintilla ? nppData._scintillaSecondHandle : nppData._scintillaMainHandle, SCI_GOTOLINE, std::stoi(std::wstring(line)) - 1, 0);
+			if (item->iItem != -1) {
+				Error error = errors[item->iItem];
+				::SendMessage(nppData._nppHandle, NPPM_DOOPEN, 0, reinterpret_cast<LPARAM>(&error.file[0]));
+				int scintilla;
+				::SendMessage(nppData._nppHandle, NPPM_GETCURRENTSCINTILLA, 0, reinterpret_cast<LPARAM>(&scintilla));
+				::SendMessage(scintilla ? nppData._scintillaSecondHandle : nppData._scintillaMainHandle, SCI_GOTOLINE, error.line - 1, 0);
+			}
+			return true;
 		} else
 			return DockingDlgInterface::run_dlgProc(message, wParam, lParam);
 	}default:
@@ -92,9 +103,10 @@ void WindowErrors::resize() {
 	RECT windowSize;
 	::GetClientRect(getHSelf(), &windowSize);
 	::SetWindowPos(listView, HWND_TOP, 2, 2, windowSize.right - windowSize.left - 4, windowSize.bottom - windowSize.top - 2, 0);
-	ListView_SetColumnWidth(listView, 0, windowSize.right - windowSize.left - 98);
+	ListView_SetColumnWidth(listView, 1, windowSize.right - windowSize.left - 288);
 }
 
 void WindowErrors::clear() {
 	ListView_DeleteAllItems(listView);
+	errors.clear();
 }
