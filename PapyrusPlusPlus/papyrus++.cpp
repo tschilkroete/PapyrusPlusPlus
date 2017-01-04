@@ -1,7 +1,7 @@
 /*
 This file is part of Papyrus++
 
-Copyright (C) 2016 Tschilkroete <tschilkroete@gmail.com>
+Copyright (C) 2016 - 2017 Tschilkroete <tschilkroete@gmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -101,9 +101,17 @@ void init() {
 		::MessageBox(nppData._nppHandle, L"Confirm the compiler settings.\nYou can change them later if you want in Plugins > Papyrus++ > Settings", L"Papyrus++ setup", MB_OK);
 		
 		DWORD size;
+#ifdef _WIN64
+		::RegGetValue(HKEY_LOCAL_MACHINE, L"SOFTWARE\\WOW6432NODE\\bethesda softworks\\skyrim", L"installed path", RRF_RT_ANY, nullptr, nullptr, &size);
+#else
 		::RegGetValue(HKEY_LOCAL_MACHINE, L"SOFTWARE\\bethesda softworks\\skyrim", L"installed path", RRF_RT_ANY, nullptr, nullptr, &size);
+#endif
 		std::vector<wchar_t> skyrimPathC(size / sizeof(wchar_t));
+#ifdef _WIN64
+		::RegGetValue(HKEY_LOCAL_MACHINE, L"SOFTWARE\\WOW6432NODE\\bethesda softworks\\skyrim", L"installed path", RRF_RT_ANY, nullptr, &skyrimPathC[0], &size);
+#else
 		::RegGetValue(HKEY_LOCAL_MACHINE, L"SOFTWARE\\bethesda softworks\\skyrim", L"installed path", RRF_RT_ANY, nullptr, &skyrimPathC[0], &size);
+#endif
 		std::wstring skyrimPath(&skyrimPathC[0]);
 		settings.putString(L"compilerPath", skyrimPath + L"Papyrus Compiler\\PapyrusCompiler.exe");
 		settings.putString(L"importDirectories", skyrimPath + L"Data\\Scripts\\Source");
@@ -144,7 +152,7 @@ LRESULT CALLBACK messageHandleProc(HWND window, UINT message, WPARAM wParam, LPA
 					line.erase(0, pathFile.size() + 1);
 				}
 				Error error;
-				int indexComma = line.find_first_of(L',');
+				size_t indexComma = line.find_first_of(L',');
 				error.line = std::stoi(line.substr(0, indexComma));
 				error.column = std::stoi(line.substr(indexComma + 1, line.find_first_of(L')') - (indexComma - 1)));
 				error.message = line.substr(line.find_first_of(L')') + 3);

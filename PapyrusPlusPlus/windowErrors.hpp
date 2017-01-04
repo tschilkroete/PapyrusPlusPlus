@@ -1,7 +1,7 @@
 /*
 This file is part of Papyrus++
 
-Copyright (C) 2016 Tschilkroete <tschilkroete@gmail.com>
+Copyright (C) 2016 - 2017 Tschilkroete <tschilkroete@gmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ public:
 	void show(std::vector<Error> errors);
 	void clear();
 protected:
-	virtual BOOL CALLBACK run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam);
+	virtual INT_PTR CALLBACK run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam);
 	void resize();
 	HWND listView;
 	const NppData& nppData;

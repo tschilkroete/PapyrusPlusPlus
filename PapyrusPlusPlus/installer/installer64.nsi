@@ -20,8 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 !include "MUI2.nsh"
 
 Name "Papyrus++ 2.1"
-OutFile "out\Papyrus++_2.1.0_Installer_x86.exe"
-InstallDirRegKey HKLM "SOFTWARE\Notepad++" ""
+OutFile "out\Papyrus++_2.1.0_Installer_x64.exe"
 
 RequestExecutionLevel admin
 
@@ -34,9 +33,14 @@ RequestExecutionLevel admin
 
 !insertmacro MUI_LANGUAGE "English"
 
+Function .onInit
+	SetRegView 64
+	ReadRegStr $INSTDIR HKLM "SOFTWARE\Notepad++" ""
+FunctionEnd
+
 Section ""
 	SetOutPath "$InstDir\plugins"
-	File "bin\Papyrus++.dll"
+	File "bin64\Papyrus++.dll"
 	SetOutPath "$InstDir\plugins\config"
 	File "..\Papyrus++.xml"
 SectionEnd

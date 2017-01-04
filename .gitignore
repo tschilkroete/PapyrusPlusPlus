@@ -3,6 +3,9 @@ Release/
 PapyrusPlusPlus/Debug/
 PapyrusPlusPlus/Release/
 PapyrusPlusPlus/installer/bin
+PapyrusPlusPlus/installer/bin64
+PapyrusPlusPlus/installer/out/*
+!PapyrusPlusPlus/installer/out/.keep
 
 .vs/
 *.vcxproj.user

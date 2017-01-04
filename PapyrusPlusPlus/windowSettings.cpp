@@ -1,7 +1,7 @@
 /*
 This file is part of Papyrus++
 
-Copyright (C) 2016 Tschilkroete <tschilkroete@gmail.com>
+Copyright (C) 2016 - 2017 Tschilkroete <tschilkroete@gmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ WindowSettings::WindowSettings(Settings& settings, HINSTANCE instance, HWND pare
 	::SetWindowLongPtr(window, GWLP_USERDATA, (LONG_PTR)this);
 	compilerPath = createTextEdit(settings.getString(L"compilerPath").c_str(), 0, 160, 10, 680, 20);
 	std::wstring imports = settings.getString(L"importDirectories");
-	unsigned int index = 0;
+	size_t index = 0;
 	while ((index = imports.find(L";", index)) != std::wstring::npos) {
 		imports.replace(index, 1, L"\r\n");
 	}
@@ -54,7 +54,7 @@ WindowSettings::WindowSettings(Settings& settings, HINSTANCE instance, HWND pare
 void WindowSettings::save() {
 	settings.putString(L"compilerPath", getText(compilerPath));
 	std::wstring imports = getText(importDirectories);
-	unsigned int index = 0;
+	size_t index = 0;
 	while ((index = imports.find(L"\r\n", index)) != std::wstring::npos) {
 		imports.replace(index, 2, L";");
 	}
@@ -66,9 +66,9 @@ void WindowSettings::save() {
 }
 
 std::wstring WindowSettings::getText(HWND edit) {
-	int length = ::GetWindowTextLength(edit);
+	size_t length = ::GetWindowTextLength(edit);
 	std::wstring content(length + 1, L' ');
-	::GetWindowText(edit, &content[0], content.size());
+	::GetWindowText(edit, &content[0], (int)content.size());
 	content.pop_back();//Remove \0
 	return content;
 }
@@ -76,7 +76,7 @@ std::wstring WindowSettings::getText(HWND edit) {
 LRESULT WindowSettings::windowProcedure(HWND window, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message) {
 	case WM_CLOSE: {
-		((WindowSettings*)::GetWindowLong(window, GWLP_USERDATA))->save();
+		((WindowSettings*)::GetWindowLongPtr(window, GWLP_USERDATA))->save();
 
 		DestroyWindow(window);
 		return 0;

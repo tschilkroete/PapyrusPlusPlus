@@ -1,7 +1,7 @@
 /*
 This file is part of Papyrus++
 
-Copyright (C) 2016 Tschilkroete <tschilkroete@gmail.com>
+Copyright (C) 2016 - 2017 Tschilkroete <tschilkroete@gmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -68,7 +68,7 @@ void WindowErrors::show(std::vector<Error> errors) {
 	DockingDlgInterface::display();
 }
 
-BOOL CALLBACK WindowErrors::run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam) {
+INT_PTR CALLBACK WindowErrors::run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message) {
 	case WM_SIZE: {
 		resize();

@@ -1,7 +1,7 @@
 /*
 This file is part of Papyrus++
 
-Copyright (C) 2016 Tschilkroete <tschilkroete@gmail.com>
+Copyright (C) 2016 - 2017 Tschilkroete <tschilkroete@gmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ bool Settings::load(std::wstring configDir) {
 	settingsFile.imbue(std::locale(settingsFile.getloc(), new std::codecvt_utf8<wchar_t>()));
 	std::wstring line;
 	while (std::getline(settingsFile, line)) {
-		int equalsIndex = line.find_first_of(L'=');
+		size_t equalsIndex = line.find_first_of(L'=');
 		std::wstring key = line.substr(0, equalsIndex);
 		std::wstring value;
 		if(equalsIndex != line.length() - 1)
