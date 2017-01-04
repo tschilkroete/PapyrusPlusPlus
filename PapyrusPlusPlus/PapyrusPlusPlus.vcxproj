@@ -79,14 +79,14 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)\PapyrusPlusPlus\installer\bin\</OutDir>
+    <OutDir>$(SolutionDir)\PapyrusPlusPlus\export\bin\</OutDir>
     <IncludePath>$(SolutionDir)\PapyrusPlusPlus\scintilla;$(IncludePath)</IncludePath>
     <TargetName>Papyrus++</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(SolutionDir)\PapyrusPlusPlus\scintilla;$(IncludePath)</IncludePath>
-    <OutDir>$(SolutionDir)\PapyrusPlusPlus\installer\bin64\</OutDir>
+    <OutDir>$(SolutionDir)\PapyrusPlusPlus\export\bin64\</OutDir>
     <TargetName>Papyrus++</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

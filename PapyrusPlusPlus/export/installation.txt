@@ -1,0 +1,3 @@
+INSTDIR is the folder you installed Notepad++ into (Usually C:\Program Files(x86)\Notepad++\ or C:\Program Files\Notepad++\).
+Copy Papyrus++.dll into INSTDIR\plugins and Papyrus++.xml into INSTDIR\plugins\Config.
+Done!
