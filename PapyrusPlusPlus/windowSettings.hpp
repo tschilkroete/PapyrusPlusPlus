@@ -33,6 +33,9 @@ private:
 	void save();
 	std::wstring getText(HWND edit);
 	static LRESULT CALLBACK windowProcedure(HWND window, UINT message, WPARAM wParam, LPARAM lParam);
+	HWND createTextEdit(const wchar_t* text, DWORD style, int x, int y, int width, int height);
+	HINSTANCE instance;
+	HWND window;
 	Settings& settings;
 	HWND compilerPath;
 	HWND importDirectories;

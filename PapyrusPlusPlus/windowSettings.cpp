@@ -23,25 +23,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 const wchar_t* SETTINGS_CLASS_NAME = L"Papyrus++ settings";
 
-WindowSettings::WindowSettings(Settings& settings, HINSTANCE instance, HWND parent) : settings(settings) {
+WindowSettings::WindowSettings(Settings& settings, HINSTANCE instance, HWND parent) : settings(settings), instance(instance) {
 	WNDCLASS windowClass = {};
 	windowClass.hInstance = instance;
 	windowClass.lpfnWndProc = windowProcedure;
 	windowClass.lpszClassName = SETTINGS_CLASS_NAME;
 	::RegisterClass(&windowClass);
 
-	HWND window = ::CreateWindow(SETTINGS_CLASS_NAME, SETTINGS_CLASS_NAME, WS_OVERLAPPED | WS_SYSMENU, CW_USEDEFAULT, CW_USEDEFAULT, 855, 250, parent, nullptr, instance, nullptr);
-	::SetWindowLong(window, GWLP_USERDATA, (LONG)this);
-	compilerPath =        ::CreateWindow(L"EDIT", settings.getString(L"compilerPath").c_str(), WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,                                      160, 10, 680, 20, window, nullptr, instance, nullptr);
+	window = ::CreateWindow(SETTINGS_CLASS_NAME, SETTINGS_CLASS_NAME, WS_OVERLAPPED | WS_SYSMENU, CW_USEDEFAULT, CW_USEDEFAULT, 855, 250, parent, nullptr, instance, nullptr);
+	::SetWindowLongPtr(window, GWLP_USERDATA, (LONG_PTR)this);
+	compilerPath = createTextEdit(settings.getString(L"compilerPath").c_str(), 0, 160, 10, 680, 20);
 	std::wstring imports = settings.getString(L"importDirectories");
 	unsigned int index = 0;
 	while ((index = imports.find(L";", index)) != std::wstring::npos) {
 		imports.replace(index, 1, L"\r\n");
 	}
-	importDirectories =   ::CreateWindow(L"EDIT", imports.c_str(), WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ES_AUTOVSCROLL | ES_MULTILINE,                                  160, 40, 680, 80, window, nullptr, instance, nullptr);
-	outputDirectory =     ::CreateWindow(L"EDIT", settings.getString(L"outputDirectory").c_str(), WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,                                   160, 130, 680, 20, window, nullptr, instance, nullptr);
-	flagFile =            ::CreateWindow(L"EDIT", settings.getString(L"flagFile").c_str(), WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,                                          160, 160, 680, 20, window, nullptr, instance, nullptr);
-	additionalArguments = ::CreateWindow(L"EDIT", settings.getString(L"additionalArguments").c_str(), WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,                               160, 190, 680, 20, window, nullptr, instance, nullptr);
+	importDirectories = createTextEdit(imports.c_str(), ES_AUTOVSCROLL | ES_MULTILINE, 160, 40, 680, 80);
+	outputDirectory = createTextEdit(settings.getString(L"outputDirectory").c_str(), 0, 160, 130, 680, 20);
+	flagFile = createTextEdit(settings.getString(L"flagFile").c_str(), 0, 160, 160, 680, 20);
+	additionalArguments = createTextEdit(settings.getString(L"additionalArguments").c_str(), 0, 160, 190, 680, 20);
 	::ShowWindow(window, SW_SHOWNORMAL);
 
 	MSG msg;
@@ -96,4 +96,8 @@ LRESULT WindowSettings::windowProcedure(HWND window, UINT message, WPARAM wParam
 	}default:
 		return DefWindowProc(window, message, wParam, lParam);
 	}
+}
+
+HWND WindowSettings::createTextEdit(const wchar_t* text, DWORD style, int x, int y, int width, int height) {
+	return ::CreateWindow(L"EDIT", text, WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | style, x, y, width, height, window, nullptr, instance, nullptr);
 }
