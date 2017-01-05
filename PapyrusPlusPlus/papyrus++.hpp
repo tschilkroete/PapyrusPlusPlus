@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "npp\PluginInterface.h"
 #include <windows.h>
 
-#define VERSION "2.1"
+#define VERSION "2.2"
 
 const WCHAR* PLUGIN_NAME = L"Papyrus++";
 const int funcCount = 4;

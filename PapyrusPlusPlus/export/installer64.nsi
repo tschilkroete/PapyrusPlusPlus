@@ -19,8 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 !include "MUI2.nsh"
 
-Name "Papyrus++ 2.1"
-OutFile "out\Papyrus++_2.1.0_Installer_x64.exe"
+Name "Papyrus++ 2.2"
+OutFile "out\Papyrus++_2.2.0_Installer_x64.exe"
 
 RequestExecutionLevel admin
 

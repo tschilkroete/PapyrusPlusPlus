@@ -201,7 +201,7 @@ void settingsWindow() {
 }
 
 void about() {
-	::MessageBox(nullptr, L"Copyright 2016\r\n"
+	::MessageBox(nullptr, L"Copyright 2016 - 2017\r\n"
 	                       "Contributors:\r\n"
 	                       "Tschilkroete\r\n"
 	                       "\r\n"
