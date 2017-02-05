@@ -31,6 +31,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <sstream>
 
+#ifdef _WIN64
+#define REGKEY_SOFTWARE(path) L"SOFTWARE\\WOW6432NODE\\" path
+#else
+#define REGKEY_SOFTWARE(path) L"SOFTWARE\\" path
+#endif
+
 BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID) {
 	if (reason == DLL_PROCESS_ATTACH) {
 		::instance = instance;
@@ -101,24 +107,21 @@ void init() {
 		::MessageBox(nppData._nppHandle, L"Confirm the compiler settings.\nYou can change them later if you want in Plugins > Papyrus++ > Settings", L"Papyrus++ setup", MB_OK);
 		
 		DWORD size;
-#ifdef _WIN64
-		::RegGetValue(HKEY_LOCAL_MACHINE, L"SOFTWARE\\WOW6432NODE\\bethesda softworks\\skyrim", L"installed path", RRF_RT_ANY, nullptr, nullptr, &size);
-#else
-		::RegGetValue(HKEY_LOCAL_MACHINE, L"SOFTWARE\\bethesda softworks\\skyrim", L"installed path", RRF_RT_ANY, nullptr, nullptr, &size);
-#endif
+		::RegGetValue(HKEY_LOCAL_MACHINE, REGKEY_SOFTWARE(L"bethesda softworks\\skyrim"), L"installed path", RRF_RT_ANY, nullptr, nullptr, &size);
 		std::vector<wchar_t> skyrimPathC(size / sizeof(wchar_t));
-#ifdef _WIN64
-		::RegGetValue(HKEY_LOCAL_MACHINE, L"SOFTWARE\\WOW6432NODE\\bethesda softworks\\skyrim", L"installed path", RRF_RT_ANY, nullptr, &skyrimPathC[0], &size);
-#else
-		::RegGetValue(HKEY_LOCAL_MACHINE, L"SOFTWARE\\bethesda softworks\\skyrim", L"installed path", RRF_RT_ANY, nullptr, &skyrimPathC[0], &size);
-#endif
-		std::wstring skyrimPath(&skyrimPathC[0]);
-		settings.putString(L"compilerPath", skyrimPath + L"Papyrus Compiler\\PapyrusCompiler.exe");
-		settings.putString(L"importDirectories", skyrimPath + L"Data\\Scripts\\Source");
-		settings.putString(L"outputDirectory", skyrimPath + L"Data\\Scripts");
-		settings.putString(L"flagFile", L"TESV_Papyrus_Flags.flg");
-		settings.putString(L"additionalArguments", L"");
-		settings.save();
+		if (size == 0) {
+			skyrimPathC.push_back('\0');
+			::MessageBox(nullptr, L"You need to configure the settings manually.", L"Can't find Skyrim", MB_OK);
+		} else {
+			::RegGetValue(HKEY_LOCAL_MACHINE, REGKEY_SOFTWARE(L"bethesda softworks\\skyrim"), L"installed path", RRF_RT_ANY, nullptr, &skyrimPathC[0], &size);
+			std::wstring skyrimPath(&skyrimPathC[0]);
+			settings.putString(L"compilerPath", skyrimPath + L"Papyrus Compiler\\PapyrusCompiler.exe");
+			settings.putString(L"importDirectories", skyrimPath + L"Data\\Scripts\\Source");
+			settings.putString(L"outputDirectory", skyrimPath + L"Data\\Scripts");
+			settings.putString(L"flagFile", L"TESV_Papyrus_Flags.flg");
+			settings.putString(L"additionalArguments", L"");
+			settings.save();
+		}
 
 		settingsWindow();
 	} else {
